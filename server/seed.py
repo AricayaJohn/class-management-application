@@ -90,7 +90,7 @@ class Professor(db.Model, SerializerMixin):
 
 class Student(db.Model, SerializerMixin):
     __tablename__ = "students"
-    serialize_rules = ('-registrations.students',) 
+    serialize_rules = ('-registrations.student',) 
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -101,7 +101,7 @@ class Student(db.Model, SerializerMixin):
     @validates('name')
     def validate_name(self, key, name):
         if not name or not isinstance(name, str):
-            raise ValueError('Name must be not empty')
+            raise ValueError('Name must not be empty')
         return name
 
     @validates('major')
@@ -112,6 +112,17 @@ class Student(db.Model, SerializerMixin):
     
     def __repr__(self):
         return f'<Student ID: {self.id} | Name: {self.name}>'
+
+class Semester(db.Model, SerializerMixin):
+    __tablename__ = "semesters"
+    serialize_rules = ('-professor.semesters', '-classes.semester',)
+
+    id = db.Column(db.Integer, primary_key=True)
+    name_year = db.Column(db.String,nullable=False)
+    professor_id = db.Column(db.Integer, db.ForeignKey('professors.id'))
+
+    professor = db.relationship('Professor', back_populates='semesters')
+    classes = db.relationship('Class', back_populates='semester', cascade='all, delete-orphan')
 
 if __name__ == '__main__':
     fake = Faker()
