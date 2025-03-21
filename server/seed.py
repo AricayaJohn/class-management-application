@@ -124,6 +124,37 @@ class Semester(db.Model, SerializerMixin):
     professor = db.relationship('Professor', back_populates='semesters')
     classes = db.relationship('Class', back_populates='semester', cascade='all, delete-orphan')
 
+    @validates('name_year')
+    def validate_name_year(self, key, name_year):
+        if not name_year or not isinstance(name_year, str):
+            raise ValueError("Semester name and year must be a string")
+        return name_year
+
+    @validates('professor_id')
+    def validate_professor_id(self, key, professor_id):
+        if not professor_id or not isinstance(professor_id, int):
+            raise ValueError('Prof ID must be a valid integer')
+        return professor_id
+
+    def __repr__(self):
+        return f'<Semester ID: {self.id} | Name: {self.name_year}>'
+
+class Class(db.Model, SerializerMixin):
+    __tablename__ = "classes"
+    serialize_rules = ('-semester.classes', '-registration.course',)
+
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String, nullable=False)
+    credits = db.Column(db.Integer, nullable=False)
+    class_room = db.Column(db.String, nullable=False)
+    semsester_id = db.Column(db.String, db.Foreignkey('semester.id'))
+
+    semester = db.relationship('Semester', back_populates='classes')
+    registration = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
+
+    
+
+
 if __name__ == '__main__':
     fake = Faker()
     with app.app_context():
