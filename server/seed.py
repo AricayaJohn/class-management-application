@@ -71,6 +71,25 @@ class Professor(db.Model, SerializerMixin):
             raise ValueError('Office location should be a string.')
         return office_location
 
+    def to_dict(self, rules=()):
+        professor_dict = {
+            "id": self.id,
+            "username": self.username,
+            "name": self.name,
+            "department": self.department,
+            "office_location": self.office_location,
+            "semester": [semester.to_dict() for semester in self.semesters]
+        }
+        for rule in rules:
+            if rule in professor_dict:
+                del professor_dict[rule]
+        return professor_dict
+    
+    def __repr__(self):
+        return f'<Professor ID: {self.id} | Username: {self.username} | Name: {self.name}'
+
+        
+
 if __name__ == '__main__':
     fake = Faker()
     with app.app_context():
