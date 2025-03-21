@@ -51,8 +51,25 @@ class Professor(db.Model, SerializerMixin):
     def authenticate(self, password):
         return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
 
+    @validates('username')
+    def validate_username(self, key, username):
+        if not username or noto isinstance(username, str):
+            raise ValueError('Username should be a string')
+        if len(username) < 5:
+            raise ValueError('Username should be at 3 characters or more')
+        return username
 
-
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name or not isinstance(name, str):
+            raise ValueError('Department must be a string')
+        return department
+    
+    @validates('office_location')
+    def validate_office_location(self, key, office_location):
+        if office_location and not isinstance(office_location, str):
+            raise ValueError('Office location should be a string.')
+        return office_location
 
 if __name__ == '__main__':
     fake = Faker()
