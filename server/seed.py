@@ -23,6 +23,36 @@ class Professor(db.Model, SerializerMixin):
 
     semester = db.relationship('Semester', back_populates='professor', cascade='all, delete-orphan')
 
+    def get_id(self):
+        return str(self.id)
+
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_anonymous(self):
+        return False
+
+    @Hybrid_property
+    def _password_hash(self):
+        raise Exception('Password hashes may not be viewed')
+
+    @Password_hash.setter
+    def password_hash(self, password):
+        if len(password) < 5:
+            raise ValueError("Password should be 5 characters or longer")
+        self._password_hash = bcrypt.generate_password_hash(password.encode('utf-8')).decode('utf-8')
+
+    def authenticate(self, password):
+        return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
+
+
+
 
 if __name__ == '__main__':
     fake = Faker()
