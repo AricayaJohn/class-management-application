@@ -104,6 +104,15 @@ class Student(db.Model, SerializerMixin):
             raise ValueError('Name must be not empty')
         return name
 
+    @validates('major')
+    def validate_major(self, key, major):
+        if not major or not isinstance(major, str):
+            raise ValueError('Major must be a string')
+        return major
+    
+    def __repr__(self):
+        return f'<Student ID: {self.id} | Name: {self.name}>'
+
 if __name__ == '__main__':
     fake = Faker()
     with app.app_context():
