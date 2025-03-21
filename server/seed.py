@@ -141,16 +141,16 @@ class Semester(db.Model, SerializerMixin):
 
 class Class(db.Model, SerializerMixin):
     __tablename__ = "classes"
-    serialize_rules = ('-semester.classes', '-registration.course',)
+    serialize_rules = ('-semester.classes', '-registrations.course',)
 
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String, nullable=False)
     credits = db.Column(db.Integer, nullable=False)
     class_room = db.Column(db.String, nullable=False)
-    semsester_id = db.Column(db.String, db.Foreignkey('semester.id'))
+    semsester_id = db.Column(db.Integer, db.ForeignKey('semesters.id'))
 
     semester = db.relationship('Semester', back_populates='classes')
-    registration = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
+    registrations = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
 
     @validates('class_name')
     def validate_class_name(self, key, class_name):
@@ -165,18 +165,31 @@ class Class(db.Model, SerializerMixin):
         return credits
 
     @validates('class_room')
+    def validate_class_room(self, key, class_room):
         if not class_room or not isinstance(class_room, str):
             raise ValueError('Class room must be a non-empty string')
         return class_room
 
     @validates('semester_id')
     def validate_semester_id(self, key, semester_id):
-        if not class_room or not isinstance(semester_id, int)
+        if not class_room or not isinstance(semester_id, int):
             raise ValueError('Semester ID must be a valid integer')
         return semester_id
 
     def __repr__(self):
         return  f'<Class ID: {self.id} | Name: {self.class_name}>'
+
+class Registration(db.Model, SerializerMixin): 
+    __tablename__ = "registrations"
+    serialize_rules = ('-student.registrations', '-course.registrations',)
+
+    id = db.Column(db.Integer, primary_key=True)
+    paid_status = db.Column(db.Boolean, nullable=False, default=False)
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+
+    student = db.relationship('Student', back_populates='registrations')
+    course = db.relationship('Class', back_populates='registrations')
 
 
 if __name__ == '__main__':
