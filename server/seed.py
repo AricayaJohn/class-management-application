@@ -152,7 +152,31 @@ class Class(db.Model, SerializerMixin):
     semester = db.relationship('Semester', back_populates='classes')
     registration = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
 
-    
+    @validates('class_name')
+    def validate_class_name(self, key, class_name):
+        if not class_name or not isinstance(class_name, str):
+            raise ValueError('Class name must be a string')
+        return class_name
+
+    @validates('credits')
+    def validate_credits(self, key, credits):
+        if not isinstance(credits, int) or credits < 1 or credits > 6:
+            raise ValueError('Credits must be an integer between 1 and 6.')
+        return credits
+
+    @validates('class_room')
+        if not class_room or not isinstance(class_room, str):
+            raise ValueError('Class room must be a non-empty string')
+        return class_room
+
+    @validates('semester_id')
+    def validate_semester_id(self, key, semester_id):
+        if not class_room or not isinstance(semester_id, int)
+            raise ValueError('Semester ID must be a valid integer')
+        return semester_id
+
+    def __repr__(self):
+        return  f'<Class ID: {self.id} | Name: {self.class_name}>'
 
 
 if __name__ == '__main__':
