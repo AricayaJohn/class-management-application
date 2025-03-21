@@ -11,8 +11,8 @@ from app import app
 from models import db
 
 class Professor(db.Model, SerializerMixin):
-    __tablename__ = "professor"
-    serialize_rules = ('_password_hash', '-semesters.professor',) 
+    __tablename__ = "professors"
+    serialize_rules = ('-_password_hash', '-semesters.professor',) 
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
@@ -21,7 +21,7 @@ class Professor(db.Model, SerializerMixin):
     office_location = db.Column(db.String, nullable=True)
     _password_hash = db.Column(db.String, nullable=False)
 
-    semester = db.relationship('Semester', back_populates='professor', cascade='all, delete-orphan')
+    semesters = db.relationship('Semester', back_populates='professor', cascade='all, delete-orphan')
 
     def get_id(self):
         return str(self.id)
@@ -38,11 +38,11 @@ class Professor(db.Model, SerializerMixin):
     def is_anonymous(self):
         return False
 
-    @Hybrid_property
+    @hybrid_property
     def _password_hash(self):
         raise Exception('Password hashes may not be viewed')
 
-    @Password_hash.setter
+    @password_hash.setter
     def password_hash(self, password):
         if len(password) < 5:
             raise ValueError("Password should be 5 characters or longer")
@@ -53,9 +53,9 @@ class Professor(db.Model, SerializerMixin):
 
     @validates('username')
     def validate_username(self, key, username):
-        if not username or noto isinstance(username, str):
+        if not username or not isinstance(username, str):
             raise ValueError('Username should be a string')
-        if len(username) < 5:
+        if len(username) < 3:
             raise ValueError('Username should be at 3 characters or more')
         return username
 
@@ -78,7 +78,7 @@ class Professor(db.Model, SerializerMixin):
             "name": self.name,
             "department": self.department,
             "office_location": self.office_location,
-            "semester": [semester.to_dict() for semester in self.semesters]
+            "semesters": [semester.to_dict() for semester in self.semesters]
         }
         for rule in rules:
             if rule in professor_dict:
@@ -88,7 +88,21 @@ class Professor(db.Model, SerializerMixin):
     def __repr__(self):
         return f'<Professor ID: {self.id} | Username: {self.username} | Name: {self.name}'
 
-        
+class Student(db.Model, SerializerMixin):
+    __tablename__ = "students"
+    serialize_rules = ('-registrations.students',) 
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    major = db.Column(db.String, nullable=False)
+
+    registrations = db.relationship('Registration', back_populates='student', cascade='all, delete-orphan')
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name or not isinstance(name, str):
+            raise ValueError('Name must be not empty')
+        return name
 
 if __name__ == '__main__':
     fake = Faker()
