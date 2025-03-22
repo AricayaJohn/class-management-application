@@ -3,7 +3,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from config import db
+from config import db, bcrypt
 
 # Models go here!
 class Professor(db.Model, SerializerMixin):
@@ -35,7 +35,7 @@ class Professor(db.Model, SerializerMixin):
         return False
 
     @hybrid_property
-    def _password_hash(self):
+    def password_hash(self):
         raise Exception('Password hashes may not be viewed')
 
     @password_hash.setter
@@ -58,8 +58,14 @@ class Professor(db.Model, SerializerMixin):
     @validates('name')
     def validate_name(self, key, name):
         if not name or not isinstance(name, str):
-            raise ValueError('Department must be a string')
+            raise ValueError('Name must be a string')
         return name
+
+    @validates('department')
+    def validate_department(self, key, department):
+        if not department or not isinstance(department, str):
+            raise ValueError('Department must be a non-empty string.')
+        return department
     
     @validates('office_location')
     def validate_office_location(self, key, office_location):
