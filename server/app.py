@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
-# Standard library imports
-
-# Remote library imports
-from flask import request
+from flask import request, make_response, abort
 from flask_restful import Resource
-
-# Local imports
-from config import app, db, api
-# Add your model imports
+from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy.exc import IntegrityError
+from config import app, db, api, login_manager, bcrypt
+from models import Professor, Student, Semester, Class, Registration
 
 
 # Views go here!
