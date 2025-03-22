@@ -1,5 +1,7 @@
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from config import db
 
@@ -25,7 +27,7 @@ class Professor(db.Model, SerializerMixin):
         return True
     
     @property
-    def is_authenticated(self):
+    def is_active(self):
         return True
     
     @property
@@ -57,7 +59,7 @@ class Professor(db.Model, SerializerMixin):
     def validate_name(self, key, name):
         if not name or not isinstance(name, str):
             raise ValueError('Department must be a string')
-        return department
+        return name
     
     @validates('office_location')
     def validate_office_location(self, key, office_location):
@@ -80,7 +82,7 @@ class Professor(db.Model, SerializerMixin):
         return professor_dict
     
     def __repr__(self):
-        return f'<Professor ID: {self.id} | Username: {self.username} | Name: {self.name}'
+        return f'<Professor ID: {self.id} | Username: {self.username} | Name: {self.name}>'
 
 class Student(db.Model, SerializerMixin):
     __tablename__ = "students"
@@ -141,7 +143,7 @@ class Class(db.Model, SerializerMixin):
     class_name = db.Column(db.String, nullable=False)
     credits = db.Column(db.Integer, nullable=False)
     class_room = db.Column(db.String, nullable=False)
-    semsester_id = db.Column(db.Integer, db.ForeignKey('semesters.id'))
+    semester_id = db.Column(db.Integer, db.ForeignKey('semesters.id'))
 
     semester = db.relationship('Semester', back_populates='classes')
     registrations = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
@@ -166,7 +168,7 @@ class Class(db.Model, SerializerMixin):
 
     @validates('semester_id')
     def validate_semester_id(self, key, semester_id):
-        if not class_room or not isinstance(semester_id, int):
+        if not semester_id or not isinstance(semester_id, int):
             raise ValueError('Semester ID must be a valid integer')
         return semester_id
 
@@ -187,14 +189,15 @@ class Registration(db.Model, SerializerMixin):
 
     @validates('class_id')
     def validate_class_id(self, key, class_id):
-        if not class_id or not isinstance(class_id int):
+        if not class_id or not isinstance(class_id, int):
             raise ValueError('Class ID must be a valid integer')
         return class_id
 
     @validates('student_id')
     def validate_student_id(self, key, student_id):
-        raise ValueError("Student ID must be a valid integer")
-    return student_id
+        if not student_id or not isinstance(student_id, int):
+            raise ValueError("Student ID must be a valid integer")
+        return student_id
 
     def __repr__(self):
         return f'<Registration ID: {self.id} | Paid: {self.paid_status}>'
