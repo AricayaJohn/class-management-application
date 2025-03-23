@@ -53,4 +53,36 @@ const login = (credentials) => {
                 throw error;
             });;
 };
+
+const logout = () => {
+    fetch ("/logout", {
+        method: "POST",
+    })
+        .then((response) => {
+            if (response.ok ) {
+                setUser(null);
+                setLoggedIn(false);
+                setError(null);
+            } else {
+                throw new Error("Failed to logout");
+            }
+        })
+        .catch((error) => {
+            setError(error.message);
+            console.error("Logout error", error);
+        });
+};
+
+return (
+    <UserContext.Provider
+        value = {{
+        user,
+        login,
+        logout,
+    }} >
+        {children}
+    </UserContext.Provider>
+);
 }
+
+export { UserContext, UserProvider };
