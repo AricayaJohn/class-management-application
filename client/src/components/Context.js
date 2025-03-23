@@ -28,5 +28,29 @@ useEffect(() => {
         })
 }, [])
 
-
+const login = (credentials) => {
+    return fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(credentials),
+    })
+        .then((response) => {
+            if (response.ok) return response.json();
+            throw new Error("Login failed");
+        })
+        .then((userData) => {
+            return fetch("/check_session", {credentials: "include" })
+            .then((res) => res.json())
+            .then((sessionData) => {
+                setUser(sessionData);
+                setLoggedIn(true);
+                setError(null);
+                });
+            })
+            .catch((error) => {
+                setError(error.message);
+                throw error;
+            });;
+};
 }
