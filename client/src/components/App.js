@@ -1,8 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { UserProvider } from "./context";
+import LoginPage from "./LoginPage";
 
 function App() {
-  return <h1>Project Client</h1>;
+  return (
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginPage />}/>
+        </Routes>
+      </Router>
+    </UserProvider>
+  )
 }
-
-export default App;
