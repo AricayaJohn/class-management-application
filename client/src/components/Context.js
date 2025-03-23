@@ -51,7 +51,7 @@ const login = (credentials) => {
             .catch((error) => {
                 setError(error.message);
                 throw error;
-            });;
+            });
 };
 
 const logout = () => {
@@ -77,6 +77,8 @@ return (
     <UserContext.Provider
         value = {{
         user,
+        loggedIn,
+        error,
         login,
         logout,
     }} >
