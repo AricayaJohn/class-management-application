@@ -8,11 +8,15 @@ from config import app, db, api, login_manager, bcrypt
 from models import Professor, Student, Semester, Class, Registration
 
 
-# Views go here!
+@login_manager.user_loader
+def load_user(professor_id):
+    return db.session.get()
 
-@app.route('/')
-def index():
-    return '<h1>Project Server</h1>'
+class CheckSession(Resource):
+    def get(self):
+        if current_user.is_authenticated:
+            return current_user.to_dict(rules=('-_password_hash',)), 200
+        return {'message': 'Not authenticated'}, 401
 
 
 if __name__ == '__main__':
