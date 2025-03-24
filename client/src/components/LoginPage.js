@@ -13,7 +13,7 @@ function LoginPage() {
     //validation will appear if field is empty
     const validationSchema = yup.object({
         username: yup.string().required("Username is required"),
-        password: yup.string().required("passowrd is required")
+        password: yup.string().required("Password is required")
     });
 
     //Setting up Formik for login page
@@ -23,7 +23,7 @@ function LoginPage() {
             password: "",
         },
         validationSchema: validationSchema,
-        onsubmit: (values) => {
+        onSubmit: (values) => {
             login(values)
              .then(() => {
                 navigate("/welcome");
@@ -49,7 +49,7 @@ function LoginPage() {
                     {formik.errors.username && <p>{formik.errors.username}</p>}
                 </div>
                 <div>
-                    <label htmlFor="password">Passwords:</label>
+                    <label htmlFor="password">Password:</label>
                     <input
                      type="password"
                      id="password"
@@ -57,11 +57,12 @@ function LoginPage() {
                      onChange={formik.handleChange}
                      value={formik.values.password}
                     />
-                    {formik.errors.password && <p>{formik.errors.passoword}</p>}
+                    {formik.errors.password && <p>{formik.errors.password}</p>}
                 </div>
                 <button type="submit">Login</button>
             </form>
         </div>
-    )
-
+    );
 }
+
+export default LoginPage
