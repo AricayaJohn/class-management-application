@@ -54,6 +54,29 @@ const login = (credentials) => {
             });
 };
 
+const signup = (credentials) => {
+    return fetch("/professors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(credentials),
+    })
+     .then((response) => {
+        if (!response.ok) throw new Error("Signup failed");
+        return fetch("/check_session", {credentials: "include"});
+     })
+     .then((res) => res.json())
+     .then((sessionData) => {
+        setUser(sessionData);
+        setLoggedIn(true);
+        setError(null);
+     })
+     .catch((error) => {
+        setError(error.message);
+        throw error;
+     });
+};
+
 const logout = () => {
     fetch ("/logout", {
         method: "POST",
@@ -80,6 +103,7 @@ return (
         loggedIn,
         error,
         login,
+        signup,
         logout,
     }} >
         {children}
