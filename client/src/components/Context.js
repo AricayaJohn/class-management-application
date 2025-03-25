@@ -25,8 +25,8 @@ useEffect(() => {
         .catch((error) => {
             setError(error.message);
             setLoggedIn(false);
-        })
-}, [])
+        });
+}, []);
 
 const login = (credentials) => {
     return fetch("/login", {
@@ -118,14 +118,14 @@ const ClassesForSemester = (semesterId) => {
         })
         .catch((error) => { 
             setError(error.message);
-            console.error("Error fetching classses:", error);
+            console.error("Error fetching classes:", error);
             throw error;
       });
 };
 
 return (
     <UserContext.Provider
-        value = {{
+        value={{
         user,
         loggedIn,
         error,
