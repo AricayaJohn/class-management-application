@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "./Context";
 
 function WelcomePage(){
-    const { user, logout, Semester, ClassesForSemester } = useContext(UserContext);
+    const { user, logout, Semesters, ClassesForSemester } = useContext(UserContext);
     const [ semesters, setSemesters ] = useState([]);
     const [ selectedSemester, setSelectedSemester ] = useState(null);
     const [ classes, setClasses ] = useState([])
     const [ loading, setLoading ] = useState([true]);
     const [ error, setError ] = useState(null);
-    const navigate = useState();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (user?.id) {
@@ -52,6 +52,28 @@ function WelcomePage(){
                 <h1>Welcome, {user?.name}!</h1>
                 <button onClick ={handleLogout}>Logout</button>
             </header>
+
+            <section className="semester-selector">
+                <h2>Classes in {selectedSemester?.name_year || "Selected Semester"}</h2>
+                <button onClick={() => navigate("/add-class")}>Add Class</button>
+            
+            <ul>
+                {classes.map((cls) => (
+                    <li key={cls.id} className="class-item">
+                        <div className="class-info">
+                            <strong>{cls.class_name}</strong>
+                            <span>Credits: {cls.credits}</span>
+                            <span>Room: {cls.class_room}</span>
+                        </div>
+                        <button onClick={() => navigate(`/classes/${cls.id}/students`)}>
+                            View Students
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            </section>
         </div>
-    )
+    );
 }
+
+export default WelcomePage;
