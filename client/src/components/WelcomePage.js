@@ -59,9 +59,27 @@ function WelcomePage(){
             </header>
 
             <section className="semester-selector">
+                <div>
+                    <label htmlFor="semester">Select Semester</label>
+                    <select
+                      id="semester"
+                      value={selectedSemester?.id || "" }
+                      onChange={handleSemesterChange}
+                    >
+                      {semesters.map((semester) => (
+                        <option key={semester.id} value={semester.id}>
+                            {semester.name_year}
+                        </option>
+                      ))}
+                    </select>
+                    <button onClick={()=> NavigationPreloadManager("/add-semester")}>Add/Delete Semester</button>
+                </div>
+            </section>
+
+            <section className="class-list">
                 <h2>Classes in {selectedSemester?.name_year || "Selected Semester"}</h2>
                 <button onClick={() => navigate("/add-class")}>Add Class</button>
-            
+                
             <ul>
                 {classes.map((cls) => (
                     <li key={cls.id} className="class-item">
