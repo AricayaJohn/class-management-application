@@ -65,6 +65,12 @@ class Professors(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
+class logout(Resource):
+    @login_required
+    def post(self):
+        logout_user()
+        return{'message': 'Logged out successfully!'}, 200
+
 
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')

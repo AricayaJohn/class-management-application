@@ -6,6 +6,7 @@ from models import Professor, Student, Semester, Registration
 def clear_data():
     print("Deleting existing data...")
     db.drop_all()
+    db.create_all()
 
 
 def seed():
