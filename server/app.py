@@ -22,8 +22,8 @@ class CurrentUser(Resource):
     @login_required
     def get(self):
         if current_user.is_authenticated:
-            return current_user.to_dict(rules=('-password_hash', '-semesters.professor',)), 200
-            return {'message': 'Not authenticated'}, 401
+            return current_user.to_dict(rules=('-_password_hash', '-semesters.professor',)), 200
+        return {'message': 'Not authenticated'}, 401
 
 class Login(Resource):
     def post(self):
@@ -40,7 +40,7 @@ class Login(Resource):
 
         if professor and professor.authenticate(password):
             login_user(professor, remember=True)
-            return current_user.to_dict(rules=('-_password_hash', '-semester.professor',)), 201
+            return current_user.to_dict(rules=('-_password_hash', '-semesters.professor',)), 201
         
         return {'message': 'Invalid credentials'}, 401
 
@@ -58,10 +58,10 @@ class Professors(Resource):
             db.session.add(new_professor)
             db.session.commit()
             login_user(new_professor, remember=True)
-            return make_response(new_professor.to_dict(rules=('-_passowrd_hash', '-semesters.professor',)), 201)
+            return make_response(new_professor.to_dict(rules=('-_password_hash', '-semesters.professor',)), 201)
         except IntegrityError:
             db.session.rollback()
-            return{'errors': 'Username already exists'}, 400
+            return {'errors': 'Username already exists'}, 400
         except Exception as e:
             return {'errors': str(e)}, 500
 

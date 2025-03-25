@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 
-# Standard library imports
-from random import randint, choice as rc
+from config import app, db, bycrpt
+from models import Professor, Student, Semester, Registration
 
-# Remote library imports
-from faker import Faker
-
-# Local imports
-from app import app
-from models import db
+def clear_data():
+    print("Deleting existing data...")
+    db.drop_all()
 
 
+def seed():
+    clear_data()
 
 if __name__ == '__main__':
-    fake = Faker()
     with app.app_context():
-        print("Starting seed...")
-        # Seed code goes here!
+        seed()
