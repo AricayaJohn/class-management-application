@@ -7,7 +7,7 @@ function WelcomePage(){
     const [ semesters, setSemesters ] = useState([]);
     const [ selectedSemester, setSelectedSemester ] = useState(null);
     const [ classes, setClasses ] = useState([])
-    const [ loading, setLoading ] = useState([true]);
+    const [ loading, setLoading ] = useState(true);
     const [ error, setError ] = useState(null);
     const navigate = useNavigate();
 
@@ -39,8 +39,8 @@ function WelcomePage(){
     }, [selectedSemester, ClassesForSemester]);
 
     const handleSemesterChange = (e) => {
-        const seleceted = semesters.find((s) => s.id === parseInt(e.target.value));
-        setSelectedSemester(seleceted);
+        const selected = semesters.find((s) => s.id === parseInt(e.target.value));
+        setSelectedSemester(selected);
     };
 
     const handleLogout = () => {
@@ -72,14 +72,14 @@ function WelcomePage(){
                         </option>
                       ))}
                     </select>
-                    <button onClick={()=> NavigationPreloadManager("/add-semester")}>Add/Delete Semester</button>
+                    <button onClick={()=> navigate("/add-semester")}>Add/Delete Semester</button>
                 </div>
             </section>
 
             <section className="class-list">
                 <h2>Classes in {selectedSemester?.name_year || "Selected Semester"}</h2>
                 <button onClick={() => navigate("/add-class")}>Add Class</button>
-                
+
             <ul>
                 {classes.map((cls) => (
                     <li key={cls.id} className="class-item">
