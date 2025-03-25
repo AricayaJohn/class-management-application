@@ -96,6 +96,33 @@ const logout = () => {
         });
 };
 
+const Semesters = () => {
+    return fetch("/semesters")
+      .then((response) => {
+        if(!response.ok) throw new Error
+        ("Failed to fetch semesters");
+        return response.json();
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error fetching semesters:", error);
+        throw error;
+      });
+};
+
+const ClassesForSemester = (semesterId) => {
+    return fetch(`/semesters/${semesterId}/classes`, { credentials: "include" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch classes");
+        return response.json();
+        })
+        .catch((error) => { 
+            setError(error.message);
+            console.error("Error fetching classses:", error);
+            throw error;
+      });
+};
+
 return (
     <UserContext.Provider
         value = {{
@@ -105,6 +132,8 @@ return (
         login,
         signup,
         logout,
+        Semesters,
+        ClassesForSemester,
     }} >
         {children}
     </UserContext.Provider>
