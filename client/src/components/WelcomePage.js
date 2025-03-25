@@ -38,5 +38,20 @@ function WelcomePage(){
         }
     }, [selectedSemester, ClassesForSemester]);
 
-    
+    const handleLogout = () => {
+        logout();
+        navigate("/");
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>
+
+    return (
+        <div className="welcome-container">
+            <header>
+                <h1>Welcome, {user?.name}!</h1>
+                <button onClick ={handleLogout}>Logout</button>
+            </header>
+        </div>
+    )
 }
