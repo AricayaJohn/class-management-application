@@ -38,6 +38,11 @@ function WelcomePage(){
         }
     }, [selectedSemester, ClassesForSemester]);
 
+    const handleSemesterChange = (e) => {
+        const seleceted = semesters.find((s) => s.id === parseInt(e.target.value));
+        setSelectedSemester(seleceted);
+    };
+
     const handleLogout = () => {
         logout();
         navigate("/");
