@@ -10,4 +10,33 @@ function WelcomePage(){
     const [ loading, setLoading ] = useState([true]);
     const [ error, setError ] = useState(null);
     const navigate = useState();
+
+    useEffect(() => {
+        if (user?.id) {
+            Semesters()
+              .then((data) => {
+                setSemesters(data);
+                setSelectedSemester(data[0] || null); //might be causeing a semester and class to show up even without assigning? 
+                setLoading(false);
+              })
+              .catch((error) => {
+                setError(error.message);
+                setLoading(false);
+              });
+        }
+    }, [user, Semesters]);
+
+    useEffect(() => {
+        if (selectedSemester?.id) {
+            ClassesForSemester(selectedSemester.id)
+              .then((data) => {
+                setClasses(data)
+              })
+              .catch((error) => {
+                setError(error.message);
+              });
+        }
+    }, [selectedSemester, ClassesForSemester]);
+
+    
 }
