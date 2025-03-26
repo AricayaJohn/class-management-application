@@ -140,7 +140,20 @@ const addSemester = (nameYear) => {
       }); 
 };
 
-
+const deleteSemester = (semesterId) => {
+    return fetch(`/semesters/${semesterId}`, {
+        method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to delete semester");
+        return response.ok;
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error deleting Semester:", error);
+        throw error;
+      });
+};
 
 return (
     <UserContext.Provider
@@ -153,7 +166,8 @@ return (
         logout,
         Semesters,
         ClassesForSemester,
-        addSemester
+        addSemester,
+        deleteSemester,
     }} >
         {children}
     </UserContext.Provider>
