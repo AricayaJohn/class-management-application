@@ -102,15 +102,17 @@ class Semesters(Resource):
         db.session.delete(semester)
         db.session.commit()
         return {}, 204
-    
+
 class SemesterClasses(Resource):
-    def get(self, semester_id):
+    def get(self, semester_id): #get all semester for current professor
         semester = db.session.get(Semester, semester_id)
         if not semester:
             return {'message': 'Semester not found'}, 404
         classes = db.session.query(Class).filter_by(semester_id=semester_id).all()
         classes_data = [cls.to_dict(rules=('-semester.classes','-registrations.course',)) for cls in classes]
         return make_response(classes_data, 200)
+
+
 
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
