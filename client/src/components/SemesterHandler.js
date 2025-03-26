@@ -30,4 +30,24 @@ function SemesterHandler() {
             "Semester name must be in the Format 'Season YYYY' (e.g., Fall 2023)"
           ),
     });
+
+    const onSubmit = {values, { setSubmitting, resetForm }} => {
+        addSemester(values.nameYear)
+            .then(() => {
+                alert("semester added successfully!");
+                resetForm();
+                navigate("/welcome");
+
+                Semester()
+                    .then((data) => setSemesters(data))
+                    .catch((error) => console.error("Error fetching semesters:", error));
+            })
+            .catch((error) => {
+                console.error("Error adding semester:", error);
+                alert("Failed to add semester. Please try again.");
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    };
 }
