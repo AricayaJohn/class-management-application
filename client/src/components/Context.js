@@ -123,6 +123,25 @@ const ClassesForSemester = (semesterId) => {
       });
 };
 
+const addSemester = (nameYear) => {
+    return fetch("/semesters", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name_year: nameYear }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to add semester");
+        return response.json();
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("error adding semester:", error);
+        throw error;
+      }); 
+};
+
+
+
 return (
     <UserContext.Provider
         value={{
@@ -134,6 +153,7 @@ return (
         logout,
         Semesters,
         ClassesForSemester,
+        addSemester
     }} >
         {children}
     </UserContext.Provider>
