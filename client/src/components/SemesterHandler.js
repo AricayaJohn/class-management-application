@@ -24,5 +24,10 @@ function SemesterHandler() {
 
     const validationSchema = Yup.object({
         nameYear: Yup.string()
-    })
+          .required("Semester name is requred")
+          .matches(
+            /^(Fall|Spring|Summer|Winter) \d{4}$/,
+            "Semester name must be in the Format 'Season YYYY' (e.g., Fall 2023)"
+          ),
+    });
 }
