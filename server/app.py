@@ -126,8 +126,48 @@ class SemesterResource(Resource):
             db.session.rollback()
             return {"message": f"Error deleting semester: {str(e)}"}, 500
 
+class Classes(Resource):
+    def get(self, class_id):
+        #fetch students for class
+        students = db.session.query(Student).join(Registration).filter(Registration.class_id == class_id).all()
+        students_data = [student.to_dict(rules=('-registration.student',))]
+        return make_response(students_data, 200)
 
+    def post(self):
+        json = request.get_json()
+        try:
+            new_class = Class(
+                class_name=json['class_name'],
+                credits=json['credits'],
+                class_room=json['class_room'],
+                semester_id=json['semester_id'],
+            )
+            db.session.add(new_class)
+            db.session.commit()
+            return make_response(new_class.to_dict(), 201)
+        except IntegrityError:
+            db.session.rollback()
+            return {'errors': 'Class already exists or invalid semester_id'}, 400
+        excepty Exception as e:
+            return {'errors': str(e), 500}
 
+class Registrations(Resource):
+    def post(self):
+        json = request.get_json()
+        try:
+            new_registration = Registration(
+                paid_status=json['paid_status'],
+                class_id=json['class_id'],
+                student_id=json['student_id'],
+            )
+            db.session.add(new_registration)
+            db.session.commit()
+            return make_respoonse(new_registration.to_dict(rules=('-student.registrations', '-course.registrations',)), 201)
+        except IntegrityError:
+            db.session.rollback()
+            return{'errors': 'Registration already exists'}, 400
+        except Exception as e:
+            return {'errors': str(e)}, 500
 
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
@@ -137,7 +177,8 @@ api.add_resource(Logout, '/logout')
 api.add_resource(Semesters, '/semesters')
 api.add_resource(SemesterClasses, '/semesters/<int:semester_id>/classes')
 api.add_resource(SemesterResource, "/semesters/<int:semester_id>")
-
+api.add_resource(Classes, '/classes', '/classes/<int:class_id>')
+api.add_resource(Registrations, '/registrations')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
