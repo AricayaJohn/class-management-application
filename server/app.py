@@ -93,15 +93,15 @@ class Semesters(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
-    def delete(self, semester_id):
-        semester = db.session.get(Semester, semester_id)
-        if not semester:
-            return {'message': 'Semester not found'}, 404
-        if semester.professor_id != current_user.id:
-            return {'message': 'Unauthorized'}, 403
-        db.session.delete(semester)
-        db.session.commit()
-        return {}, 204
+    # def delete(self, semester_id):
+    #     semester = db.session.get(Semester, semester_id)
+    #     if not semester:
+    #         return {'message': 'Semester not found'}, 404
+    #     if semester.professor_id != current_user.id:
+    #         return {'message': 'Unauthorized'}, 403
+    #     db.session.delete(semester)
+    #     db.session.commit()
+    #     return {}, 204
 
 class SemesterClasses(Resource):
     def get(self, semester_id): #get all semester for current professor
@@ -112,6 +112,21 @@ class SemesterClasses(Resource):
         classes_data = [cls.to_dict(rules=('-semester.classes','-registrations.course',)) for cls in classes]
         return make_response(classes_data, 200)
 
+#function to delete semester
+class SemesterResource(Resource):
+    def delete(Self, semester_id):
+        semester = db.session.get(Semester, semester_id)
+        if not semester:
+            return {"message": "Semester not found"}, 404
+        try:
+            db.session.delete(semester)
+            db.session.commit()
+            return {"message": "Semester delete successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Error deleting semester: {str(e)}"}, 500
+
+
 
 
 api.add_resource(CheckSession, '/check_session')
@@ -121,6 +136,7 @@ api.add_resource(Professors, '/professors')
 api.add_resource(Logout, '/logout')
 api.add_resource(Semesters, '/semesters')
 api.add_resource(SemesterClasses, '/semesters/<int:semester_id>/classes')
+api.add_resource(SemesterResource, "/semesters/<int:semester_id>")
 
 
 if __name__ == '__main__':
