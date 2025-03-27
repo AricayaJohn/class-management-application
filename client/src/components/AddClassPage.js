@@ -21,4 +21,15 @@ function AddClass() {
         room: "",
         semesterId: "",
     };
+
+    const validationSchema = Yup.object({
+        className: Yup.string().required("Class name is required"),
+        credits: Yup.number()
+            .required("Credits are required")
+            .positive("Credits must be positive")
+            .integer("Credits mmust be a whole number"),
+        room: Yup.string().required("Room is required"),
+        semesterId: Yup.string().required("Semester is required"),
+    });
+
 }
