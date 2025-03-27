@@ -9,5 +9,16 @@ function AddClass() {
     const { Semesters, addClass } = useContext(UserContext);
     const [ semesters, setSemesters ] = useState([]);
     
-    
+    useEffect(() => {
+        Semesters()
+          .then((data) => setSemesters(data))
+          .catch((error) => console.error("Error fetching semesters:", error));
+    }, [Semesters]);
+
+    const initialValues = {
+        className: "",
+        credits: "",
+        room: "",
+        semesterId: "",
+    };
 }
