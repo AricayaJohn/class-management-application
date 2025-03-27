@@ -38,7 +38,7 @@ function SemesterHandler() {
                 resetForm();
                 navigate("/welcome");
 
-                Semester()
+                Semesters()
                     .then((data) => setSemesters(data))
                     .catch((error) => console.error("Error fetching semesters:", error));
             })
@@ -88,23 +88,23 @@ function SemesterHandler() {
                         className="error" />
                     </div>
                     <button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Adding..." : "Add/Delete Semester"}
+                        {isSubmitting ? "Adding..." : "Add Semester"}
                     </button>
-
-                    <h2>Delete Semester</h2>
-                    <ul>
-                        {semesters.map((semester) => (
-                            <li key={semester.id}>
-                                {semester.name_year}
-                                <button type="button" onClick={() => handleDeleteSemester(semester.id)}>
-                                    Delete
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
                 </Form>
               )}
             </Formik>
+
+            <h2>Delete Semester</h2>
+            <ul>
+                {semesters.map((semester) => (
+                    <li key={semester.id}>
+                        {semester.name_year}
+                        <button type="button" onClick={() => handleDeleteSemester(semester.id)}>
+                            Delete
+                        </button>
+                    </li>
+                ))}
+            </ul>
 
             <Link to="/welcome">Back to Welcome Page</Link>
         </div>
