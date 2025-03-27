@@ -190,6 +190,7 @@ return (
         ClassesForSemester,
         addSemester,
         deleteSemester,
+        addClass,
     }} >
         {children}
     </UserContext.Provider>
