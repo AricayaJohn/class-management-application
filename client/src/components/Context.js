@@ -155,6 +155,28 @@ const deleteSemester = (semesterId) => {
       });
 };
 
+const addClass = (className, credits, room, semesterId) => {
+    return fetch("/classes", {
+        method: "POST",
+        headers: { "Contents-Type": "application/json" },
+        body: JSON.stringify({
+            class_name: className,
+            credits: parseInt(credits),
+            class_room: room,
+            semester_id: parseInt(semesterId),
+        }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to add class");
+        return response.json();
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error adding class:", error);
+        throw error;
+      });
+};
+
 return (
     <UserContext.Provider
         value={{
