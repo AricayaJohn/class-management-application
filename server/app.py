@@ -114,7 +114,7 @@ class SemesterClasses(Resource):
 
 #function to delete semester
 class SemesterResource(Resource):
-    def delete(Self, semester_id):
+    def delete(self, semester_id):
         semester = db.session.get(Semester, semester_id)
         if not semester:
             return {"message": "Semester not found"}, 404
@@ -148,8 +148,8 @@ class Classes(Resource):
         except IntegrityError:
             db.session.rollback()
             return {'errors': 'Class already exists or invalid semester_id'}, 400
-        excepty Exception as e:
-            return {'errors': str(e), 500}
+        except Exception as e:
+            return {'errors': str(e)}, 500
 
 class Registrations(Resource):
     def post(self):
@@ -162,7 +162,7 @@ class Registrations(Resource):
             )
             db.session.add(new_registration)
             db.session.commit()
-            return make_respoonse(new_registration.to_dict(rules=('-student.registrations', '-course.registrations',)), 201)
+            return make_response(new_registration.to_dict(rules=('-student.registrations', '-course.registrations',)), 201)
         except IntegrityError:
             db.session.rollback()
             return{'errors': 'Registration already exists'}, 400
