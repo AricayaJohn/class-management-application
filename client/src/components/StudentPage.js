@@ -8,4 +8,19 @@ function StudentPage() {
     const { classId } = useParams();
     const [ students, setStudents ] = useState([]);
     const { StudentsForClass, addStudent, deleteStudent } = useContext(UserContext);
+
+    useEffect(() => {
+        StudentsForClass(classId)
+          .then((data) => {
+            if (Array.isArrat(data)) {
+                setStudents(data);
+            } else {
+                throw new Error("Invalid data format: expected an array");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching students:", error);
+            setStudents([]);
+          });
+    }, [classId, StudentsForClass]);
 }
