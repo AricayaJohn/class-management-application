@@ -212,6 +212,21 @@ const addStudent = (name, major, classId) => {
       });
 };
 
+const deleteStudent = (studentId) => {
+    return fetch(`/students/${studentId}`, {
+        method: "DELETE",
+    })
+      .then((response) => {
+        if(!response.ok) throw new Error("Failed to delete student");
+        return response.ok;
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error deleting student:", error);
+        throw error;
+      })
+}
+
 return (
     <UserContext.Provider
         value={{
@@ -227,6 +242,8 @@ return (
         deleteSemester,
         addClass,
         StudentsForClass,
+        addStudent,
+        deleteStudent,
     }} >
         {children}
     </UserContext.Provider>
