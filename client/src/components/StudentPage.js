@@ -48,6 +48,7 @@ function StudentPage() {
                 setSubmitting(false);
             });
     };
+
     const handleDeleteStudents = (studentId) => {
         deleteStudent(studentId)
           .then(() => {
@@ -57,4 +58,50 @@ function StudentPage() {
             console.error("Error deleting student:", error);
           });
     };
+
+    return (
+        <div>
+            <h1> Add Student</h1>
+            <h2>Student in this Class</h2>
+            <ul>
+                {students.length > 0 ? (
+                    students.map((student) => (
+                        <li key={student.id}>
+                         {student.name} - {student.major}
+                         <button onClick={() => handleDeleteStudents(student.id)}>Delete</button>
+                        </li>
+                    ))
+                ) : (
+                    <p>No student found.</p>
+                )}
+            </ul>
+
+            <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={onSubmit}
+            >
+                {({ isSubmitting}) => (
+                    <Form>
+                        <div>
+                            <label htmlFor="name">Name:</label>
+                            <Field type="text" id="name" name="name" />
+                            <ErrorMessage name="name" component="div" className="error" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="major">Major:</label>
+                            <Field type="text" id="major" name="major" />
+                            <ErrorMessage name="major" component="div" className="error" />
+                        </div>
+
+                        <button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? "Adding..." : "Add Student"}
+                        </button>
+                        <Link to="/welcome">Back to Welcome Page</Link>
+                    </Form>
+                )}
+            </Formik>
+        </div>
+    )
 }
