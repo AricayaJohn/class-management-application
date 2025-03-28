@@ -177,6 +177,22 @@ const addClass = (className, credits, room, semesterId) => {
       });
 };
 
+// fetch student in class
+const StudentsForClass = (classId) => {
+    return fetch(`/classes/${classId}`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch students");
+        return response.json()
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error fetching students:", error);
+        throw error;
+      });
+};
+
+
+
 return (
     <UserContext.Provider
         value={{
@@ -191,6 +207,7 @@ return (
         addSemester,
         deleteSemester,
         addClass,
+        StudentsForClass,
     }} >
         {children}
     </UserContext.Provider>
