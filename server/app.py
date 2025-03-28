@@ -169,6 +169,41 @@ class Registrations(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
+class Students(Resource):
+    def post(self):
+        json = request.get_json()
+        try:
+            #create new student
+            new_student = Student(name=json['name'], major=json['major'])
+            db.session.add(new_student)
+            db.session.commit()
+
+            if 'class_id' in json:
+                new_registration = Registration(
+                    paid_status=False,
+                    class_id=json['class_id'],
+                    student_id=new_student.id,
+                )
+                db.session.add(new_registration)
+                db.session.commit()
+            
+            return make_response(new_student.to_dict(rules=('-registrations.student',)), 201)
+        except IntegrityError:
+            db.session.rollback()
+            return {'errors': 'Student already exists'}, 400
+        except Exception as e:
+            return {'errors': str(e)}, 500
+
+    def delete(self, id):
+        student = db.session.get(Student, id)
+        if not student:
+            abort(404, "Student not found")
+        db.session.delete(student)
+        db.session.commit()
+        return {}, 204
+
+            
+
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
 api.add_resource(CurrentUser, '/current_user')
@@ -179,6 +214,7 @@ api.add_resource(SemesterClasses, '/semesters/<int:semester_id>/classes')
 api.add_resource(SemesterResource, "/semesters/<int:semester_id>")
 api.add_resource(Classes, '/classes', '/classes/<int:class_id>')
 api.add_resource(Registrations, '/registrations')
+api.add_resource(Students, '/students', '/students/<int:id>')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
