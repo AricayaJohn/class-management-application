@@ -48,4 +48,13 @@ function StudentPage() {
                 setSubmitting(false);
             });
     };
+    const handleDeleteStudents = (studentId) => {
+        deleteStudent(studentId)
+          .then(() => {
+            setStudents(students.filter((student) => student.id !== studentId));
+          })
+          .catch((error) => {
+            console.error("Error deleting student:", error);
+          });
+    };
 }
