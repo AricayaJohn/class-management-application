@@ -191,7 +191,26 @@ const StudentsForClass = (classId) => {
       });
 };
 
-
+const addStudent = (name, major, classId) => {
+    return fetch("/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: name,
+            major: major,
+            class_id: parseInt(classId),
+        }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to add student");
+        return response.json();
+      })
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error adding student:", error);
+        throw error;
+      });
+};
 
 return (
     <UserContext.Provider
