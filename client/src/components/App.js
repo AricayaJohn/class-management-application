@@ -5,6 +5,7 @@ import SignUpPage from "./SignUpPage";
 import WelcomePage from "./WelcomePage";
 import SemesterHandler from "./SemesterHandler";
 import AddClassPage from "./AddClassPage";
+import StudentPage from "./StudentPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/add-semester" element={<SemesterHandler />} />
           <Route path="/add-class" element={<AddClassPage />} />
+          <Route path="/classes/:classId/students" element={<StudentPage />} />
         </Routes>
       </Router>
     </UserProvider>

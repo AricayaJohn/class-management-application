@@ -35,7 +35,7 @@ function StudentPage() {
     });
 
     const onSubmit = (values, { setSubmitting, resetForm }) => {
-        addStudent( values.name, values.major, classId)
+        addStudent(values.name, values.major, classId)
             .then((newStudent) => {
                 setStudents([...students, newStudent]);
                 resetForm();
@@ -49,7 +49,7 @@ function StudentPage() {
             });
     };
 
-    const handleDeleteStudents = (studentId) => {
+    const handleDeleteStudent = (studentId) => {
         deleteStudent(studentId)
           .then(() => {
             setStudents(students.filter((student) => student.id !== studentId));
@@ -62,17 +62,17 @@ function StudentPage() {
     return (
         <div>
             <h1> Add Student</h1>
-            <h2>Student in this Class</h2>
+            <h2>Students in this Class</h2>
             <ul>
                 {students.length > 0 ? (
                     students.map((student) => (
                         <li key={student.id}>
                          {student.name} - {student.major}
-                         <button onClick={() => handleDeleteStudents(student.id)}>Delete</button>
+                         <button onClick={() => handleDeleteStudent(student.id)}>Delete</button>
                         </li>
                     ))
                 ) : (
-                    <p>No student found.</p>
+                    <p>No students found.</p>
                 )}
             </ul>
 
@@ -105,3 +105,5 @@ function StudentPage() {
         </div>
     )
 }
+
+export default StudentPage;

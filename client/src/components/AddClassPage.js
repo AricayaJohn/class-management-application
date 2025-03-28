@@ -93,7 +93,7 @@ function AddClass() {
                         <button type="submit" disabled={isSubmitting}>
                             {isSubmitting ? "Adding..." : "Add Class"}
                         </button>
-                        <Link to="welcome">Bacl to Welcome Page</Link>
+                        <Link to="welcome">Back to Welcome Page</Link>
                     </Form>
                 )}
             </Formik>
