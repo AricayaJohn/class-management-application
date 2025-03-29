@@ -130,7 +130,7 @@ class Classes(Resource):
     def get(self, class_id):
         #fetch students for class
         students = db.session.query(Student).join(Registration).filter(Registration.class_id == class_id).all()
-        students_data = [student.to_dict(rules=('-registration.student',))]
+        students_data = [student.to_dict(rules=('-registration.student',)) for student in students]
         return make_response(students_data, 200)
 
     def post(self):
