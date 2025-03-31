@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from config import app, db, bycrpt
+from config import app, db, bcrypt
 from models import Professor, Student, Semester, Registration
 
 def clear_data():
@@ -25,7 +25,7 @@ def create_students():
     print("Creating students...")
     student1 = Student(name="Alice Johnson", major="Computer Science")
     student2 = Student(name="Bob Brown", major="Mathematics")
-    student3 = Student(name="Charlie Davis", major="Phisics")
+    student3 = Student(name="Charlie Davis", major="Physics")
 
     db.session.add_all([student1, student2, student3])
     db.session.commit()
@@ -34,7 +34,7 @@ def create_students():
 
 def create_semesters(professors):
     print("creating semesters...")
-    semester1 = Semester(name_year="Fall 2023", professor_id= professor[0].id)
+    semester1 = Semester(name_year="Fall 2023", professor_id= professors[0].id)
     semester2 = Semester(name_year="Spring 2024", professor_id=professors[1].id)
 
     db.session.add_all([semester1, semester2])
@@ -51,7 +51,7 @@ def create_classes(semesters):
         semester_id=semesters[0].id,
     )
     class2 = Class(
-        class_name="Calculus 1"
+        class_name="Calculus 1",
         credits=4,
         class_room="Room 302"
         semester_id=semesters[0].id,
@@ -66,9 +66,9 @@ def create_classes(semesters):
     db.session.add_all([class1, class2, class3])
     db.session.commit()
 
-    return[class1, class2, class3]
+    return [class1, class2, class3]
 
-def create_registration(students, classes):
+def create_registrations(students, classes):
     print("Creating registrations...")
     registration1 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[0].id)
     registration2 = Registration(paid_status=False, class_id=classes[1].id, student_id=students[0].id)
@@ -76,7 +76,7 @@ def create_registration(students, classes):
     registration3 = Registration(paid_status=True, class_id=classes[1].id, student_id=students[1].id)
     registration4 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[1].id)
 
-    registration5 = Registration(paid_status=True, class_id=classes[0].id, student_id=student[2].id)
+    registration5 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[2].id)
     registration6 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[2].id)
 
     db.session.add_all([registration1, registration2, registration3, registration4, registration5, registration6])
@@ -85,7 +85,15 @@ def create_registration(students, classes):
     return [registration1, registration2, registration3, registration4, registration5, registration6]
 
 def seed():
+    print("Starting seed process...")
     clear_data()
+    professors = create_professors()
+    students = create_students()
+    semesters = create_semesters(professors)
+    classes = create_classes(semesters)
+    registrations = create_registration(students, classes)
+
+    print("Database seeded successfully")
 
 if __name__ == '__main__':
     with app.app_context():
