@@ -48,8 +48,41 @@ def create_classes(semesters):
         class_name="Introduction to Programming",
         credits=3,
         class_room="Room 301",
-        semester_id
+        semester_id=semesters[0].id,
     )
+    class2 = Class(
+        class_name="Calculus 1"
+        credits=4,
+        class_room="Room 302"
+        semester_id=semesters[0].id,
+    )
+    class3 = Class(
+        class_name="Linear Algebra",
+        credits=4,
+        class_room="Room 303",
+        semester_id=semesters[1].id,
+    )
+
+    db.session.add_all([class1, class2, class3])
+    db.session.commit()
+
+    return[class1, class2, class3]
+
+def create_registration(students, classes):
+    print("Creating registrations...")
+    registration1 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[0].id)
+    registration2 = Registration(paid_status=False, class_id=classes[1].id, student_id=students[0].id)
+
+    registration3 = Registration(paid_status=True, class_id=classes[1].id, student_id=students[1].id)
+    registration4 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[1].id)
+
+    registration5 = Registration(paid_status=True, class_id=classes[0].id, student_id=student[2].id)
+    registration6 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[2].id)
+
+    db.session.add_all([registration1, registration2, registration3, registration4, registration5, registration6])
+    db.session.commit()
+
+    return [registration1, registration2, registration3, registration4, registration5, registration6]
 
 def seed():
     clear_data()
