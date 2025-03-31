@@ -158,7 +158,7 @@ const deleteSemester = (semesterId) => {
 const addClass = (className, credits, room, semesterId) => {
     return fetch("/classes", {
         method: "POST",
-        headers: { "Contents-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             class_name: className,
             credits: parseInt(credits),
