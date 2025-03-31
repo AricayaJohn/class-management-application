@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from config import app, db, bcrypt
-from models import Professor, Student, Semester, Registration
+from models import Professor, Student, Semester, Class, Registration
 
 def clear_data():
     print("Deleting existing data...")
@@ -33,7 +33,7 @@ def create_students():
     return [student1, student2, student3]
 
 def create_semesters(professors):
-    print("creating semesters...")
+    print("Creating semesters...")
     semester1 = Semester(name_year="Fall 2023", professor_id= professors[0].id)
     semester2 = Semester(name_year="Spring 2024", professor_id=professors[1].id)
 
@@ -53,7 +53,7 @@ def create_classes(semesters):
     class2 = Class(
         class_name="Calculus 1",
         credits=4,
-        class_room="Room 302"
+        class_room="Room 302",
         semester_id=semesters[0].id,
     )
     class3 = Class(
@@ -91,7 +91,7 @@ def seed():
     students = create_students()
     semesters = create_semesters(professors)
     classes = create_classes(semesters)
-    registrations = create_registration(students, classes)
+    registrations = create_registrations(students, classes)
 
     print("Database seeded successfully")
 
