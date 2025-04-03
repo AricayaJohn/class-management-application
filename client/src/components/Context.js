@@ -6,6 +6,11 @@ function UserProvider({ children }) {
     const [user, setUser ] = useState(null); //check authentication of (user/professor)
     const [loggedIn, setLoggedIn ] = useState(false); // track if user login status
     const [error, setError ] = useState(null); // State for errors 
+    const [semester, setSemesters] = useState([])
+    const [classes, setClasses] = useState([])
+    const [student, setStudents] = useState([])
+
+    
 
 //Auto-login when app starts or when user login 
 useEffect(() => {
@@ -19,6 +24,8 @@ useEffect(() => {
         .then((data) => {
             if (data?.id) {
                 setUser(data);
+                // console.log(data.semesters)
+                console.log(data.classes)
                 setLoggedIn(true);
             }
         })

@@ -14,6 +14,7 @@ function WelcomePage(){
     useEffect(() => {
         if (user?.id) {
             Semesters()
+            //data.semester 
               .then((data) => {
                 setSemesters(data);
                 setSelectedSemester(data[0] || null); //might be causeing a semester and class to show up even without assigning? 
@@ -78,7 +79,7 @@ function WelcomePage(){
 
             <section className="class-list">
                 <h2>Classes in {selectedSemester?.name_year || "Selected Semester"}</h2>
-                <button onClick={() => navigate("/add-class")}>Add Class</button>
+                <button className="add-class-btn" onClick={() => navigate("/add-class")}>Add Class</button>
 
             <ul>
                 {classes.map((cls) => (
