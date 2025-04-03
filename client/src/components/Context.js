@@ -21,12 +21,9 @@ useEffect(() => {
             throw new Error("Not authenticated");
         })
         .then((data) => {
-            if (data?.id) {
-                setUser(data);
                 // console.log(data.semesters)
-                console.log(data.classes)
-                setLoggedIn(true);
-            }
+                // console.log(data.classes)
+                processSessionData(data);
         })
         .catch((error) => {
             setError(error.message);
@@ -34,6 +31,7 @@ useEffect(() => {
         });
 }, []);
 
+//helper function for session data
 const processSessionData = (data) => {
     if (data?.id) {
         setUser(data);
@@ -41,13 +39,16 @@ const processSessionData = (data) => {
 
         if (data.semester) {
             setSemesters(data.semesters);
-
+            
+            //get all classes for semester
             const allClasses = data.semesters.flatMap(semester => semester.classes || []);
             setClasses(allClasses);
 
+            //get all registrations 
             const allRegistrations = allClasses.flatMap(cls => cls.allRegistrations || []);
             setRegistrations(allRegistrations);
-
+            
+            //get all students 
             const allStudents = allRegistrations.map(reg => reg.student).filter(Boolean);
             setStudents(allStudents);
         }
@@ -69,8 +70,7 @@ const login = (credentials) => {
             return fetch("/check_session", {credentials: "include" })
             .then((res) => res.json())
             .then((sessionData) => {
-                setUser(sessionData);
-                setLoggedIn(true);
+                processSessionData(sessionData);
                 setError(null);
                 });
             })
@@ -93,8 +93,7 @@ const signup = (credentials) => {
      })
      .then((res) => res.json())
      .then((sessionData) => {
-        setUser(sessionData);
-        setLoggedIn(true);
+        processSessionData(sessionData);
         setError(null);
      })
      .catch((error) => {
