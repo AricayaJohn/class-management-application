@@ -126,36 +126,15 @@ const logout = () => {
         });
 };
 
+//fetch class for specific semester
 const ClassesForSemester = (semesterId) => {
-    return Promise.resolve(classes.filter(cls => cls.semester_id))
+    return Promise.resolve(classes.filter(cls => cls.semester_id === semesterId));
 }
 
-const Semesters = () => {
-    return fetch("/semesters")
-      .then((response) => {
-        if(!response.ok) throw new Error
-        ("Failed to fetch semesters");
-        return response.json();
-      })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error fetching semesters:", error);
-        throw error;
-      });
-};
-
-const ClassesForSemester = (semesterId) => {
-    return fetch(`/semesters/${semesterId}/classes`, { credentials: "include" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch classes");
-        return response.json();
-        })
-        .catch((error) => { 
-            setError(error.message);
-            console.error("Error fetching classes:", error);
-            throw error;
-      });
-};
+//fetch students for class 
+const StudentsForClass = (semesterId) => {
+    return Promise.resolve(classes.filter(cls => cls.semester_id === semesterId));
+}
 
 const addSemester = (nameYear) => {
     return fetch("/semesters", {
@@ -207,20 +186,6 @@ const addClass = (className, credits, room, semesterId) => {
       .catch((error) => {
         setError(error.message);
         console.error("Error adding class:", error);
-        throw error;
-      });
-};
-
-// fetch student in class
-const StudentsForClass = (classId) => {
-    return fetch(`/classes/${classId}`)
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch students");
-        return response.json()
-      })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error fetching students:", error);
         throw error;
       });
 };
