@@ -9,8 +9,7 @@ function UserProvider({ children }) {
     const [semester, setSemesters] = useState([])
     const [classes, setClasses] = useState([])
     const [student, setStudents] = useState([])
-
-    
+    const [registrations, setRegistrations] = useState([])
 
 //Auto-login when app starts or when user login 
 useEffect(() => {
@@ -34,6 +33,26 @@ useEffect(() => {
             setLoggedIn(false);
         });
 }, []);
+
+const processSessionData = (data) => {
+    if (data?.id) {
+        setUser(data);
+        setLoggedIn(true);
+
+        if (data.semester) {
+            setSemesters(data.semesters);
+
+            const allClasses = data.semesters.flatMap(semester => semester.classes || []);
+            setClasses(allClasses);
+
+            const allRegistrations = allClasses.flatMap(cls => cls.allRegistrations || []);
+            setRegistrations(allRegistrations);
+
+            const allStudents = allRegistrations.map(reg => reg.student).filter(Boolean);
+            setStudents(allStudents);
+        }
+    }
+};
 
 const login = (credentials) => {
     return fetch("/login", {
