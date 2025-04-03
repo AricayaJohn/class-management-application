@@ -105,11 +105,16 @@ const signup = (credentials) => {
 const logout = () => {
     fetch ("/logout", {
         method: "POST",
+        credentials: "include",
     })
         .then((response) => {
             if (response.ok ) {
                 setUser(null);
                 setLoggedIn(false);
+                setSemesters([]);
+                setClasses([]);
+                setStudents([]);
+                setRegistrations([]);
                 setError(null);
             } else {
                 throw new Error("Failed to logout");
@@ -120,6 +125,10 @@ const logout = () => {
             console.error("Logout error", error);
         });
 };
+
+const ClassesForSemester = (semesterId) => {
+    return Promise.resolve(classes.filter(cls => cls.semester_id))
+}
 
 const Semesters = () => {
     return fetch("/semesters")
