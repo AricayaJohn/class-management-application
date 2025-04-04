@@ -10,7 +10,7 @@ function SemesterHandler() {
     const [loading, setLoading] = useState(false);
     
     useEffect(() => {
-        if(!loggedIn) {
+        if (!loggedIn) {
             navigate("/login");
         }
     }, [loggedIn, navigate]);
@@ -32,7 +32,7 @@ function SemesterHandler() {
         setLoading(true);
         addSemester(values.nameYear)
             .then(() => {
-                alert("semester added successfully!");
+                alert("Semester added successfully!");
                 resetForm();
                 navigate("/welcome");
             })
@@ -51,11 +51,11 @@ function SemesterHandler() {
             setLoading(true);
             deleteSemester(semesterId)
                 .then(() => {
-                    alert("Semester delete successfully!");
+                    alert("Semester deleted successfully!");
             })
             .catch((error) => {
                 console.error("Error deleting semester:", error);
-                alert("Failed to delete semester. Please try again.");
+                alert(error.message || "Failed to delete semester. Please try again.");
             })
             .finally(() => {
                 setLoading(false);
@@ -63,8 +63,8 @@ function SemesterHandler() {
         }
     };
 
-    if (loading) return <div>Loading... </div>
-    if (error) return <div>Error: {error}</div>
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div>
@@ -96,7 +96,7 @@ function SemesterHandler() {
               )}
             </Formik>
 
-            <h2>Current Semester</h2>
+            <h2>Current Semesters</h2>
             {semesters.length === 0 ? (
                 <p>No semesters found</p>
             ) : (
@@ -104,7 +104,7 @@ function SemesterHandler() {
                 {semesters.map((semester) => (
                     <li key={semester.id}>
                         {semester.name_year}
-                        <button type="button" onClick={() => handleDeleteSemester(semester.id)}>
+                        <button type="button" onClick={() => handleDeleteSemester(semester.id)} disabled={loading}>
                             Delete
                         </button>
                     </li>

@@ -3,39 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "./Context";
 
 function WelcomePage(){
-    const { user, logout, Semesters, ClassesForSemester } = useContext(UserContext);
-    const [ semesters, setSemesters ] = useState([]);
-    const [ selectedSemester, setSelectedSemester ] = useState(null);
-    const [ classes, setClasses ] = useState([])
-    const [ loading, setLoading ] = useState(true);
-    const [ error, setError ] = useState(null);
+    const { user, logout, semesters, classes, ClassesForSemester, loading, error } = useContext(UserContext);
+    const [selectedSemester, setSelectedSemester] = useState(null);
+    const [semesterClasses, setSemesterClasses] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user?.id) {
-            Semesters()
-            //data.semester 
-              .then((data) => {
-                setSemesters(data);
-                setSelectedSemester(data[0] || null); //might be causeing a semester and class to show up even without assigning? 
-                setLoading(false);
-              })
-              .catch((error) => {
-                setError(error.message);
-                setLoading(false);
-              });
+        if (semesters.length > 0 ) {
+            setSelectedSemester(semesters[0]);
         }
-    }, [user, Semesters]);
+    }, [semesters]);
 
     useEffect(() => {
         if (selectedSemester?.id) {
             ClassesForSemester(selectedSemester.id)
-              .then((data) => {
-                setClasses(data)
-              })
-              .catch((error) => {
-                setError(error.message);
-              });
+              .then(data => setSemesterClasses(data))
+              .catch((err) => console.error("Error fetching classes:", err));
         }
     }, [selectedSemester, ClassesForSemester]);
 
@@ -50,13 +33,13 @@ function WelcomePage(){
     };
 
     if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="welcome-container">
             <header>
                 <h1>Welcome, {user?.name}!</h1>
-                <button onClick ={handleLogout}>Logout</button>
+                <button onClick={handleLogout}>Logout</button>
             </header>
 
             <section className="semester-selector">
@@ -82,7 +65,7 @@ function WelcomePage(){
                 <button className="add-class-btn" onClick={() => navigate("/add-class")}>Add Class</button>
 
             <ul>
-                {classes.map((cls) => (
+                {semesterClasses.map((cls) => (
                     <li key={cls.id} className="class-item">
                         <div className="class-info">
                             <strong>{cls.class_name}</strong>
