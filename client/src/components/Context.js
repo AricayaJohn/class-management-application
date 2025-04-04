@@ -45,7 +45,7 @@ const processSessionData = (data) => {
             setClasses(allClasses);
 
             //get all registrations 
-            const allRegistrations = allClasses.flatMap(cls => cls.allRegistrations || []);
+            const allRegistrations = allClasses.flatMap(cls => cls.registrations || []);
             setRegistrations(allRegistrations);
             
             //get all students 
@@ -149,7 +149,7 @@ const addSemester = (nameYear) => {
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to add semester");
-        return response.json();
+        return res.json();
       })
       .then(newSemester => {
         setSemesters([...semesters, newSemester]);
@@ -178,7 +178,7 @@ const addClass = (className, credits, room, semesterId) => {
             class_name: className,
             credits: credits,
             class_room: room,
-            semester_id: semesterId,
+            semester_id: semesterId
         }),
     })
       .then((res) => {

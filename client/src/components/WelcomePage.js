@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "./Context";
 
 function WelcomePage(){
-    const { user, logout, semesters, classes, ClassesForSemester, loading, error } = useContext(UserContext);
+    const { user, logout, semesters, ClassesForSemester, loading, error } = useContext(UserContext);
     const [selectedSemester, setSelectedSemester] = useState(null);
     const [semesterClasses, setSemesterClasses] = useState([]);
     const navigate = useNavigate();
