@@ -194,8 +194,23 @@ const addStudent = (name, major, classId) => {
         });
 };
 
-
-    
+const addRegistration = (studentId, classId) => {
+    return fetch("/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+            student_id: studentId,
+            class_id: classId,
+            paid_status: false
+        }),
+    })
+        .then(handleResponse)
+        .then(newReg => {
+            setRegistrations([...registrations, newReg]);
+            return newReg;
+        });
+};    
 
 const deleteStudent = (studentId) => {
     return fetch(`/students/${studentId}`, {
