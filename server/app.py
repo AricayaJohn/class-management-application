@@ -161,6 +161,15 @@ class Classes(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
+class ClassStudent(Resource):
+    @login_required
+    def get(self, class_id):
+        cls = Class.query.get(class_id)
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Class not found'}, 404
+        return [s.to_dict(rules=('-registrations.student'))
+        for s in cls.students], 200
+
 class Registrations(Resource):
     def post(self):
         json = request.get_json()
@@ -183,37 +192,33 @@ class Registrations(Resource):
             return {'errors': str(e)}, 500
 
 class Students(Resource):
+    @login_required
+    def get(self):
+        students = Student.query.all()
+        return [s.to_dict(rules=('-registrations.student',))
+        for s in students], 200
+
+    @login_required
     def post(self):
         json = request.get_json()
         try:
-            #create new student
-            new_student = Student(name=json['name'], major=json['major'])
+            student = Student(
+                name=json['name'], 
+                major=json['major']
+            )
             db.session.add(new_student)
             db.session.commit()
-
-            if 'class_id' in json:
-                new_registration = Registration(
-                    paid_status=False,
-                    class_id=json['class_id'],
-                    student_id=new_student.id,
-                )
-                db.session.add(new_registration)
-                db.session.commit()
-            
-            return make_response(new_student.to_dict(rules=('-registrations.student',)), 201)
-        except IntegrityError:
-            db.session.rollback()
-            return {'errors': 'Student already exists'}, 400
+            return student.to_dict(rules=('-registrations.student',)), 201
         except Exception as e:
             return {'errors': str(e)}, 500
 
-    def delete(self, id):
-        student = db.session.get(Student, id)
-        if not student:
-            abort(404, "Student not found")
-        db.session.delete(student)
-        db.session.commit()
-        return {}, 204
+    # def delete(self, id):
+    #     student = db.session.get(Student, id)
+    #     if not student:
+    #         abort(404, "Student not found")
+    #     db.session.delete(student)
+    #     db.session.commit()
+    #     return {}, 204
 
             
 
