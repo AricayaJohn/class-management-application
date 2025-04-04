@@ -6,17 +6,14 @@ import { UserContext } from "./Context";
 
 function SemesterHandler() {
     const navigate = useNavigate();
-    const { addSemester, deleteSemester, Semesters } = useContext(UserContext);
-    const [semesters, setSemesters] = useState([]);
+    const { addSemester, deleteSemester, semesters, loggedIn, error } = useContext(UserContext);
+    const [loading, setLoading] = useState(false);
     
     useEffect(() => {
-        Semesters()
-            .then((data) => {
-                console.log("Fetched semesters:", data);
-                setSemesters(data);
-            })
-            .catch((error) => console.error("Error fetching semesters: ", error));
-    }, [Semesters]);
+        if(!loggedIn) {
+            navigate("/login");
+        }
+    }, [loggedIn, navigate]);
 
     const initialValues = {
         nameYear: "",
@@ -32,37 +29,42 @@ function SemesterHandler() {
     });
 
     const onSubmit = (values, { setSubmitting, resetForm }) => {
+        setLoading(true);
         addSemester(values.nameYear)
             .then(() => {
                 alert("semester added successfully!");
                 resetForm();
                 navigate("/welcome");
-
-                Semesters()
-                    .then((data) => setSemesters(data))
-                    .catch((error) => console.error("Error fetching semesters:", error));
             })
             .catch((error) => {
                 console.error("Error adding semester:", error);
-                alert("Failed to add semester. Please try again.");
+                alert(error.message || "Failed to add semester. Please try again.");
             })
             .finally(() => {
                 setSubmitting(false);
+                setLoading(false);
             });
     };
 
     const handleDeleteSemester = (semesterId) => {
-        console.log("Deleting semester with ID:", semesterId);
-        deleteSemester(semesterId)
-            .then(() => {
-                alert("Semester delete successfully!");
-                setSemesters(semesters.filter((semester) => semester.id !== semesterId));
+        if (window.confirm("Are you sure you want to delete this semester?")) {
+            setLoading(true);
+            deleteSemester(semesterId)
+                .then(() => {
+                    alert("Semester delete successfully!");
             })
             .catch((error) => {
                 console.error("Error deleting semester:", error);
                 alert("Failed to delete semester. Please try again.");
+            })
+            .finally(() => {
+                setLoading(false);
             });
+        }
     };
+
+    if (loading) return <div>Loading... </div>
+    if (error) return <div>Error: {error}</div>
 
     return (
         <div>
@@ -94,8 +96,11 @@ function SemesterHandler() {
               )}
             </Formik>
 
-            <h2>Delete Semester</h2>
-            <ul>
+            <h2>Current Semester</h2>
+            {semesters.length === 0 ? (
+                <p>No semesters found</p>
+            ) : (
+                <ul>
                 {semesters.map((semester) => (
                     <li key={semester.id}>
                         {semester.name_year}
@@ -105,6 +110,7 @@ function SemesterHandler() {
                     </li>
                 ))}
             </ul>
+            )}
 
             <Link to="/welcome">Back to Welcome Page</Link>
         </div>

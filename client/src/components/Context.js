@@ -6,9 +6,9 @@ function UserProvider({ children }) {
     const [user, setUser ] = useState(null); //check authentication of (user/professor)
     const [loggedIn, setLoggedIn ] = useState(false); // track if user login status
     const [error, setError ] = useState(null); // State for errors 
-    const [semester, setSemesters] = useState([])
+    const [semesters, setSemesters] = useState([])
     const [classes, setClasses] = useState([])
-    const [student, setStudents] = useState([])
+    const [students, setStudents] = useState([])
     const [registrations, setRegistrations] = useState([])
 
 //Auto-login when app starts or when user login 
@@ -37,7 +37,7 @@ const processSessionData = (data) => {
         setUser(data);
         setLoggedIn(true);
 
-        if (data.semester) {
+        if (data.semesters) {
             setSemesters(data.semesters);
             
             //get all classes for semester
@@ -132,39 +132,40 @@ const ClassesForSemester = (semesterId) => {
 }
 
 //fetch students for class 
-const StudentsForClass = (semesterId) => {
-    return Promise.resolve(classes.filter(cls => cls.semester_id === semesterId));
-}
+const StudentsForClass = (classId) => {
+    const classRegistrations = registrations.filter(reg => reg.class_id === classId);
+    const classStudents = classRegistrations.map(reg => students.find(student => student.id === reg.student_id)).filter(Boolean);
+    return Promise.resolve(classStudents);
+};
 
+
+//CRUD operations 
 const addSemester = (nameYear) => {
     return fetch("/semesters", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ name_year: nameYear }),
     })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to add semester");
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to add semester");
         return response.json();
       })
-      .catch((error) => {
-        setError(error.message);
-        console.error("error adding semester:", error);
-        throw error;
+      .then(newSemester => {
+        setSemesters([...semesters, newSemester]);
+        return newSemester;
       }); 
 };
 
 const deleteSemester = (semesterId) => {
     return fetch(`/semesters/${semesterId}`, {
         method: "DELETE",
+        credentials: "include",
     })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to delete semester");
-        return response.ok;
-      })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error deleting Semester:", error);
-        throw error;
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete semester");
+        setSemesters(semesters.filter(s => s.id !== semesterId));
+        setClasses(classes.filter(c => c.semester_id !== semesterId));
       });
 };
 
@@ -172,75 +173,78 @@ const addClass = (className, credits, room, semesterId) => {
     return fetch("/classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
             class_name: className,
-            credits: parseInt(credits),
+            credits: credits,
             class_room: room,
-            semester_id: parseInt(semesterId),
+            semester_id: semesterId,
         }),
     })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to add class");
-        return response.json();
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to add class");
+        return res.json();
       })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error adding class:", error);
-        throw error;
+      .then(newClass => {
+        setClasses([...classes, newClass]);
+        return newClass;
       });
 };
 
-const addStudent = (name, major, classId) => {
+const addStudent = (name, major) => {
     return fetch("/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            name: name,
-            major: major,
-            class_id: parseInt(classId),
-        }),
+        credentials: "include",
+        body: JSON.stringify({ name, major}),
     })
       .then((response) => {
         if (!response.ok) throw new Error("Failed to add student");
         return response.json();
       })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error adding student:", error);
-        throw error;
+      .then(newStudent => {
+        setStudents([...students, newStudent]);
+        return newStudent;
       });
 };
 
 const deleteStudent = (studentId) => {
     return fetch(`/students/${studentId}`, {
         method: "DELETE",
+        credentials: "include",
     })
-      .then((response) => {
-        if(!response.ok) throw new Error("Failed to delete student");
-        return response.ok;
-      })
-      .catch((error) => {
-        setError(error.message);
-        console.error("Error deleting student:", error);
-        throw error;
-      })
-}
+      .then((res) => {
+        if(!res.ok) throw new Error("Failed to delete student");
+        setStudents(students.filter(s => s.id !== studentId));
+        setRegistrations(registrations.filter(r => r.student_id !== studentId));
+      });
+};
 
 return (
     <UserContext.Provider
         value={{
+        //state 
         user,
         loggedIn,
         error,
+        semesters,
+        classes,
+        students,
+        registrations,
+        
+        //authorization functions
         login,
         signup,
         logout,
-        Semesters,
+
+        //data fetching
         ClassesForSemester,
+        StudentsForClass,
+
+        //CRUD operations
         addSemester,
         deleteSemester,
         addClass,
-        StudentsForClass,
         addStudent,
         deleteStudent,
     }} >

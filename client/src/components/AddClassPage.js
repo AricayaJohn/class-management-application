@@ -6,14 +6,8 @@ import { UserContext } from "./Context";
 
 function AddClass() {
     const navigate = useNavigate();
-    const { Semesters, addClass } = useContext(UserContext);
-    const [ semesters, setSemesters ] = useState([]);
-    
-    useEffect(() => {
-        Semesters()
-          .then((data) => setSemesters(data))
-          .catch((error) => console.error("Error fetching semesters:", error));
-    }, [Semesters]);
+    const { semesters, addClass, loggedIn, error } = useContext(UserContext);
+    const [loading, setLoading] = useState(false);
 
     const initialValues = {
         className: "",
@@ -33,6 +27,7 @@ function AddClass() {
     });
 
     const onSubmit = (values, { setSubmitting, resetForm }) => {
+        setLoading(true);
         addClass(values.className, values.credits, values.room, values.semesterId)
           .then(() => {
             alert("Class added successfully!");
@@ -45,8 +40,13 @@ function AddClass() {
           })
           .finally(() => {
             setSubmitting(false);
+            setLoading(false);
           });
     };
+
+    if (!loggedIn) return <div>Please login to add classes</div>;
+    if (error) return <div>Error: {error}</div>;
+    if (loading) return <div>Loading...</div>;
 
     return (
         <div>
@@ -90,10 +90,10 @@ function AddClass() {
                             <ErrorMessage name="semesterId" component="div" className="error" />
                         </div>
 
-                        <button type="submit" disabled={isSubmitting}>
+                        <button type="submit" disabled={isSubmitting || loading}>
                             {isSubmitting ? "Adding..." : "Add Class"}
                         </button>
-                        <Link to="welcome">Back to Welcome Page</Link>
+                        <Link to="/welcome">Back to Welcome Page</Link>
                     </Form>
                 )}
             </Formik>
