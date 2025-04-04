@@ -15,31 +15,21 @@ function UserProvider({ children }) {
 useEffect(() => {
     fetch("/check_session", { credentials: "include" })
         .then((response) => {
-            if (response.ok) {
+            if (response.ok)
                 return response.json();
-            }
-            throw new Error("Not authenticated");
+                throw new Error("Not authenticated");
         })
-        .then((data) => {
-                // console.log(data.semesters)
-                // console.log(data.classes)
-                processSessionData(data);
-        })
-        .catch((error) => {
-            setError(error.message);
-            setLoggedIn(false);
-        });
-}, []);
+        .then(processSessionData)
+        .catch(() => setLoggedIn(false));
+    }, [])
 
 //helper function for session data
 const processSessionData = (data) => {
     if (data?.id) {
         setUser(data);
         setLoggedIn(true);
-
         if (data.semesters) {
             setSemesters(data.semesters);
-            
             //get all classes for semester
             const allClasses = data.semesters.flatMap(semester => semester.classes || []);
             setClasses(allClasses);
@@ -66,19 +56,9 @@ const login = (credentials) => {
             if (response.ok) return response.json();
             throw new Error("Login failed");
         })
-        .then((userData) => {
-            return fetch("/check_session", {credentials: "include" })
-            .then((res) => res.json())
-            .then((sessionData) => {
-                processSessionData(sessionData);
-                setError(null);
-                });
-            })
-            .catch((error) => {
-                setError(error.message);
-                throw error;
-            });
-};
+        .then(handleResponse)
+        .then(() => fetch("/check_session", {
+            credentials: "include" }))
 
 const signup = (credentials) => {
     return fetch("/professors", {
