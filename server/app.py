@@ -136,12 +136,22 @@ class Classes(Resource):
     def post(self):
         json = request.get_json()
         try:
+            if not all(field in json for field in ['class_name', 'credits', 'class_room', 'semester_id']):
+                return {'errors': 'missing required fields'}, 400
+
+            semester_id =int(json['semester_id'])
+
+            semester = db.session.get(Semester, semester_id)
+            if not semester:
+                return {'errors': 'Semester not found'}, 404
+
             new_class = Class(
                 class_name=json['class_name'],
                 credits=json['credits'],
                 class_room=json['class_room'],
-                semester_id=json['semester_id'],
+                semester_id=semester_id,
             )
+
             db.session.add(new_class)
             db.session.commit()
             return make_response(new_class.to_dict(), 201)
@@ -163,6 +173,9 @@ class Registrations(Resource):
             db.session.add(new_registration)
             db.session.commit()
             return make_response(new_registration.to_dict(rules=('-student.registrations', '-course.registrations',)), 201)
+        except ValueError as e:
+            db.session.rollback()
+            return {'errors': f'Invalid data format: {str(e)}'}, 400
         except IntegrityError:
             db.session.rollback()
             return{'errors': 'Registration already exists'}, 400
