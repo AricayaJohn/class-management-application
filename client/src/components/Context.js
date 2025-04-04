@@ -58,7 +58,10 @@ const login = (credentials) => {
         })
         .then(handleResponse)
         .then(() => fetch("/check_session", {
-            credentials: "include" }))
+        credentials: "include" }))
+        .then(handleResponse)
+        .then(processSessionData);
+};
 
 const signup = (credentials) => {
     return fetch("/professors", {
@@ -112,12 +115,16 @@ const ClassesForSemester = (semesterId) => {
 }
 
 //fetch students for class 
-const StudentsForClass = (classId) => {
-    const classRegistrations = registrations.filter(reg => reg.class_id === classId);
-    const classStudents = classRegistrations.map(reg => students.find(student => student.id === reg.student_id)).filter(Boolean);
-    return Promise.resolve(classStudents);
-};
+const ClassStudents = (classId) => {
+    return fetch(`/classes/${classId}/students`, {
+    credentials: "include"})
+        .then(handleResponse);
+    };
 
+const getAllStudents = () => {
+    return fetch("/students", { credentials: "include" })
+        .then(handleResponse);
+};
 
 //CRUD operations 
 const addSemester = (nameYear) => {
@@ -173,57 +180,22 @@ const addClass = (className, credits, room, semesterId) => {
 
 // Modified addStudent to check for existing student and register to class if exists
 const addStudent = (name, major, classId) => {
-    // First check if student already exists
-    const existingStudent = students.find(s => s.name === name && s.major === major);
-
-    if (existingStudent) {
-        // Student exists, register to class
-        return fetch("/registrations", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ student_id: existingStudent.id, class_id: parseInt(classId) }),
-        })
-        .then((res) => {
-            if (!res.ok) throw new Error("Failed to register student to class");
-            return res.json();
-        })
-        .then((newReg) => {
-            setRegistrations([...registrations, newReg]);
-            return existingStudent;
-        });
-    } else {
-        // Student doesn't exist, create student and register
-        return fetch("/students", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ name, major }),
-        })
-        .then((response) => {
-            if (!response.ok) throw new Error("Failed to add student");
-            return response.json();
-        })
+    return fetch("/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, major }),
+    })
+        .then(handleResponse)
         .then(newStudent => {
             setStudents([...students, newStudent]);
-            return fetch("/registrations", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ student_id: newStudent.id, class_id: parseInt(classId) }),
-            })
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to register new student to class");
-                return res.json();
-            })
-            .then((newReg) => {
-                setRegistrations([...registrations, newReg]);
-                return newStudent;
-            });
+            return addRegistration(newStudent.id, classId)
+            .then(() => newStudent);
         });
-    }
 };
 
+
+    
 
 const deleteStudent = (studentId) => {
     return fetch(`/students/${studentId}`, {
