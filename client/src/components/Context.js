@@ -56,11 +56,18 @@ const login = (credentials) => {
             if (response.ok) return response.json();
             throw new Error("Login failed");
         })
-        .then(handleResponse)
-        .then(() => fetch("/check_session", {
-        credentials: "include" }))
-        .then(handleResponse)
-        .then(processSessionData);
+        .then((userData) => {
+            return fetch("/check_session", {credentials: "include" })
+            .then((res) => res.json())
+            .then((sessionData) => {
+                processSessionData(sessionData);
+                setError(null);
+                });
+            })
+            .catch((error) => {
+                setError(error.message);
+                throw error;
+            });
 };
 
 const signup = (credentials) => {
@@ -224,6 +231,15 @@ const deleteStudent = (studentId) => {
       });
 };
 
+const handleResponse = (response) => {
+    if (!response.ok) {
+        return response.json().then(err => {
+            throw new Error(err.message || "Request failed");
+        });
+    }
+    return response.json();
+};
+
 return (
     <UserContext.Provider
         value={{
@@ -243,7 +259,8 @@ return (
 
         //data fetching
         ClassesForSemester,
-        StudentsForClass,
+        ClassStudents,
+        getAllStudents,
 
         //CRUD operations
         addSemester,
@@ -251,6 +268,7 @@ return (
         addClass,
         addStudent,
         deleteStudent,
+        addRegistration,
     }} >
         {children}
     </UserContext.Provider>
