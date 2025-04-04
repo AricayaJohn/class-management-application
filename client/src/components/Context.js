@@ -217,8 +217,8 @@ const deleteStudent = (studentId) => {
         method: "DELETE",
         credentials: "include",
     })
-      .then((res) => {
-        if(!res.ok) throw new Error("Failed to delete student");
+      .then(handleResponse)
+      .then(() => {
         setStudents(students.filter(s => s.id !== studentId));
         setRegistrations(registrations.filter(r => r.student_id !== studentId));
       });
