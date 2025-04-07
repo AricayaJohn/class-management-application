@@ -32,17 +32,22 @@ function RegistrationPage() {
         loadData();
     }, [classId, getClassEnrollment])
 
-    const handleEnroll = () => {
-        if (!selectedStudentId) return;
-        addRegistration(parseInt(selectedStudentId), parseInt(classId))
-        .then(() => {
-            const newStudent = allStudents.find(s => s.id === parseInt(selectedStudentId));
-            setStudents([...students, newStudent]);
-            setSelectedStudentId("");
-        })
-        .catch((err) => {
-            alert("Failed to enroll student: " + err.message);
-        });
+    const handleEnroll = async () => {
+        if (!selected) return;
+        try {
+            setLoading(true);
+            await(createRegistration({
+                class_id: classId,
+                student_id:selected
+            }));
+            const newData = await getClassEnrollment(classId);
+            setRegistrations(newData.registrations);
+            setSelected("");
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteStudent = (studentId) => {
