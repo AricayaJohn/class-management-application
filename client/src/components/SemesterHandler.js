@@ -26,25 +26,34 @@ function SemesterHandler() {
           .matches(
             /^(Fall|Spring|Summer|Winter) \d{4}$/,
             "Semester name must be in the format 'Season YYYY' (e.g., Fall 2023)"
-          ),
+          )
+          .test(
+            'unique-semester',
+            'Semester already exists',
+            value => !semesters.some(s => s.name_year === value && s.id !== editingId)
+          )
     });
 
-    const onSubmit = (values, { setSubmitting, resetForm }) => {
+    const handleSubmit = (values, { setSubmitting, resetForm }) => {
         setLoading(true);
-        addSemester(values.nameYear)
-            .then(() => {
-                alert("Semester added successfully!");
-                resetForm();
-                navigate("/welcome");
-            })
-            .catch((error) => {
-                console.error("Error adding semester:", error);
-                alert(error.message || "Failed to add semester. Please try again.");
-            })
-            .finally(() => {
-                setSubmitting(false);
-                setLoading(false);
-            });
+        const operation = editingId ?
+            updatingSemester(editingId, values.nameYear) :
+            addSemester(values.nameYear);
+
+        operation.then(() => {
+            alert(`Semester ${editingId ? 'updated' : 'added'} successfully!`);
+            resetForm();
+            setEditingId(null);
+            navigate("/welcome");
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+            alert(error.message || `Failed to ${editingId ? 'update' : 'add'} semester`);
+        })
+        .finally(() => {
+            setSubmitting(false);
+            setLoading(false);
+        });
     };
 
     const handleDeleteSemester = (semesterId) => {
@@ -52,6 +61,7 @@ function SemesterHandler() {
             setLoading(true);
             deleteSemester(semesterId)
                 .then(() => {
+                    if (editingId === semesterId) setEditingId(null);
                     alert("Semester deleted successfully!");
             })
             .catch((error) => {
