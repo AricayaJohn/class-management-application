@@ -37,7 +37,7 @@ function SemesterHandler() {
     const handleSubmit = (values, { setSubmitting, resetForm }) => {
         setLoading(true);
         const operation = editingId ?
-            updatingSemester(editingId, values.nameYear) :
+            updateSemester(editingId, values.nameYear) :
             addSemester(values.nameYear);
 
         operation.then(() => {
@@ -80,12 +80,14 @@ function SemesterHandler() {
     return (
         <div>
             <h1>Semester Management</h1>
-            <h2>Add/Delete Semester</h2>
+            <h2>{editingId ? "Edit Semester" : "Add New Semester"}</h2>
 
             <Formik
+              key={editingId || "Create"}
               initialValues={initialValues}
               validationSchema={validationSchema}
-              onSubmit={onSubmit}
+              onSubmit={handleSubmit}
+              enableReinitialize
             >
               {({isSubmitting}) => (
                 <Form>
@@ -100,9 +102,25 @@ function SemesterHandler() {
                         <ErrorMessage name="nameYear" component="div"
                         className="error" />
                     </div>
-                    <button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Adding..." : "Add Semester"}
-                    </button>
+                    <div className="form-actions">
+                        <button type="submit" disabled={isSubmitting}>
+                            {editingId ? 
+                            (isSubmitting ? "Updating..." : "Update Semester") :
+                            (isSubmitting ? "Adding..." : "Add Semester")}
+                        </button>
+                        {editingId && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEditingId(null);
+                                    navigate("/semesters");
+                                }}
+                                disabled={isSubmitting}
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
                 </Form>
               )}
             </Formik>
@@ -111,19 +129,32 @@ function SemesterHandler() {
             {semesters.length === 0 ? (
                 <p>No semesters found</p>
             ) : (
-                <ul>
-                {semesters.map((semester) => (
-                    <li key={semester.id}>
-                        {semester.name_year}
-                        <button type="button" onClick={() => handleDeleteSemester(semester.id)} disabled={loading}>
-                            Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
+                <ul className="semester-list">
+                    {semesters.map((semester) => (
+                        <li key={semester.id} className={editingId === semester.id ? "editing" : ""}>
+                            <span>{semester.name_year}</span>
+                            <div className="semester-actions">
+                                <button 
+                                    type="button"
+                                    onClick={() => setEditingId(semester.id)}
+                                    disabled={loading}
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    type ="button"
+                                    onClick={() => handleDeleteSemester(semester.id)}
+                                    disabled={loading}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             )}
 
-            <Link to="/welcome">Back to Welcome Page</Link>
+            <Link to="/welcome" className="back-link">Back to Welcome Page</Link>
         </div>
     )
 }
