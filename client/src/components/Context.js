@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 
 const UserContext = createContext();
 
@@ -8,8 +8,6 @@ function UserProvider({ children }) {
     const [error, setError ] = useState(null); // State for errors 
     const [semesters, setSemesters] = useState([])
     const [classes, setClasses] = useState([])
-    const [students, setStudents] = useState([])
-    const [registrations, setRegistrations] = useState([])
 
 //Auto-login when app starts or when user login 
 useEffect(() => {

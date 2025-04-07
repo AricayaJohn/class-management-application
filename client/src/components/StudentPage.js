@@ -8,9 +8,9 @@ function StudentPage() {
         ClassStudents,
         getAllStudents,
         addRegistration,
-        deleteStudent, } = useContext(UserContext);
+        deleteStuent, } = useContext(UserContext);
 
-    const [students, setStudents] = useState([]);
+    const [ students, setStudents ] = useState([]);
     const [allStudents, setAllStudents] = useState([]);
     const [selectedStudentId, setSelectedStudentId] = useState("")
 
@@ -74,10 +74,8 @@ function StudentPage() {
                     <button onClick={handleEnroll}>Enroll Student</button>
                 </>
             ): (
-                <p>No students available for enrollment.</p>
+                <p>No Students Available for enrollment.</p>
             )}
-
-            <h2> Students in this Class</h2>
             <ul>
                 {students.length > 0 ? (
                     students.map((student) => (
@@ -90,9 +88,8 @@ function StudentPage() {
                     <p>No students enrolled yet.</p>
                 )}
             </ul>
-            <Link to="/welcome">Back to Welcome Page</Link>
         </div>
-    );
+    )
 }
 
 export default StudentPage;
