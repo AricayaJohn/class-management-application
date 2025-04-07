@@ -72,7 +72,7 @@ function WelcomePage(){
                             <span>Credits: {cls.credits}</span>
                             <span>Room: {cls.class_room}</span>
                         </div>
-                        <button onClick={() => navigate(`/classes/${cls.id}/students`)}>
+                        <button onClick={() => navigate(`/classes/${cls.id}/registrations`)}>
                             View Students
                         </button>
                     </li>
