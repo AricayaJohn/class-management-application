@@ -92,8 +92,6 @@ const logout = () => {
                 setLoggedIn(false);
                 setSemesters([]);
                 setClasses([]);
-                setStudents([]);
-                setRegistrations([]);
                 setError(null);
             } else {
                 throw new Error("Failed to logout");
@@ -116,11 +114,6 @@ const ClassStudents = (classId) => {
     credentials: "include"})
         .then(handleResponse);
     };
-
-const getAllStudents = () => {
-    return fetch("/students", { credentials: "include" })
-        .then(handleResponse);
-};
 
 //CRUD operations 
 const addSemester = (nameYear) => {
@@ -152,6 +145,22 @@ const deleteSemester = (semesterId) => {
       });
 };
 
+const updateSemester = useCallback((semesterId, nameYear) => {
+    return fetch(`/semesters/${semesterId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({name_year: nameYear})
+    })
+    .then(handleResponse)
+    .then(updatedSemester => {
+        setSemesters(sems => sems.map(s => 
+          s.id === updatedSemester.id ? updatedSemester : s
+      ));
+      return updatedSemester;
+    });
+}, []);
+
 const addClass = (className, credits, room, semesterId) => {
     return fetch("/classes", {
         method: "POST",
@@ -174,51 +183,9 @@ const addClass = (className, credits, room, semesterId) => {
       });
 };
 
-// Modified addStudent to check for existing student and register to class if exists
-const addStudent = (name, major, classId) => {
-    return fetch("/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, major }),
-    })
-        .then(handleResponse)
-        .then(newStudent => {
-            setStudents([...students, newStudent]);
-            return addRegistration(newStudent.id, classId)
-            .then(() => newStudent);
-        });
-};
 
-const addRegistration = (studentId, classId) => {
-    return fetch("/registrations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-            student_id: studentId,
-            class_id: classId,
-            paid_status: false
-        }),
-    })
-        .then(handleResponse)
-        .then(newReg => {
-            setRegistrations([...registrations, newReg]);
-            return newReg;
-        });
-};    
 
-const deleteStudent = (studentId) => {
-    return fetch(`/students/${studentId}`, {
-        method: "DELETE",
-        credentials: "include",
-    })
-      .then(handleResponse)
-      .then(() => {
-        setStudents(students.filter(s => s.id !== studentId));
-        setRegistrations(registrations.filter(r => r.student_id !== studentId));
-      });
-};
+
 
 const handleResponse = (response) => {
     if (!response.ok) {
@@ -237,9 +204,7 @@ return (
         loggedIn,
         error,
         semesters,
-        classes,
-        students,
-        registrations,
+
         
         //authorization functions
         login,
@@ -248,16 +213,16 @@ return (
 
         //data fetching
         ClassesForSemester,
-        ClassStudents,
-        getAllStudents,
 
         //CRUD operations
         addSemester,
         deleteSemester,
         addClass,
-        addStudent,
-        deleteStudent,
-        addRegistration,
+        updateSemester,
+
+        getClassEnrollment,
+        createRegistration,
+        deleteRegistration,
     }} >
         {children}
     </UserContext.Provider>
