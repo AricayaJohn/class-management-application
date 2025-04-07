@@ -92,10 +92,13 @@ class SemesterResource(Resource):
         semester = db.session.get(Semester, semester_id)
         if not semester:
             return {"message": "Semester not found"}, 404
+        if semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+        
         try:
             db.session.delete(semester)
             db.session.commit()
-            return {"message": "Semester delete successfully"}, 200
+            return {}, 204
         except Exception as e:
             db.session.rollback()
             return {"message": f"Error deleting semester: {str(e)}"}, 500
@@ -106,6 +109,10 @@ class SemesterResource(Resource):
         if not semester:
             return {"message": "Missing name_year field"}, 404
         if semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+
+        data = request.get_json()
+        if 'name_year' not in data:
             return {'message': 'Missing name_year field'}, 400
 
         try: 
@@ -124,7 +131,7 @@ class Classes(Resource):
         json = request.get_json()
         try:
             if not all(field in json for field in ['class_name', 'credits', 'class_room', 'semester_id']):
-                return {'errors': 'missing required fields'}, 400
+                return {'errors': 'Missing required fields'}, 400
 
             semester_id =int(json['semester_id'])
 
@@ -160,7 +167,7 @@ class ClassEnrollment(Resource):
             'id': r.id,
             'paid_status': r.paid_status,
             'student': r.student.to_dict(rules=('-registrations',))
-        } for in r in registrations]
+        } for r in registrations]
 
         subquery = db.session.query(Registration.student_id).filter_by(class_id=class_id)
         available = Student.query.filter(~Student.id.in_(subquery)).all()
@@ -171,83 +178,71 @@ class ClassEnrollment(Resource):
 
         return {
             'registrations': registered,
-            'avaialable': available_students
+            'available': available_students
         }, 200
 
 class Registrations(Resource):
     @login_required
     def post(self):
         data = request.get_json()
-            cls = Class.query.get(data['class_id'])
+        cls = Class.query.get(data['class_id'])
 
-            if not cls or cls.semester.professor_id != current_user.id:
-                return {'message': 'Class not found'}, 404
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Class not found'}, 404
 
-            if Registration.query.filter_by(
-                student_id=data['student_id'],
-                class_id=data['class_id']
-            ).first():
-                return {'message': 'Student already registered'}, 400
+        if Registration.query.filter_by(
+            student_id=data['student_id'],
+            class_id=data['class_id']
+        ).first():
+            return {'message': 'Student already registered'}, 400
 
-            registration = Registration(
-                class_id=data['class_id'],
-                student_id=data['student_id'],
-                paid_status=False
-            )
-            db.session.add(registration)
-            db.session.commit()
-            return {
-                'id': registration.id,
-                'paid_status': registration.paid_status,
-                'student': registration.student.to_dict(rules=('-registrations',))
-            }, 201
-
-class Students(Resource):
-    @login_required
-    def get(self):
-        students = Student.query.all()
-        return [s.to_dict(rules=('-registrations.student',))
-        for s in students], 200
-
-    @login_required
-    def post(self):
-        json = request.get_json()
-        try:
-            student = Student(
-                name=json['name'], 
-                major=json['major']
-            )
-            db.session.add(student)
-            db.session.commit()
-            return student.to_dict(rules=('-registrations.student',)), 201
-        except Exception as e:
-            return {'errors': str(e)}, 500
-
-    # def delete(self, id):
-    #     student = db.session.get(Student, id)
-    #     if not student:
-    #         abort(404, "Student not found")
-    #     db.session.delete(student)
-    #     db.session.commit()
-    #     return {}, 204
-
+        registration = Registration(
+            class_id=data['class_id'],
+            student_id=data['student_id'],
+            paid_status=False
+        )
+        db.session.add(registration)
+        db.session.commit()
             
+        return {
+            'id': registration.id,
+            'paid_status': registration.paid_status,
+            'student': registration.student.to_dict(rules=('-registrations',))
+        }, 201
+
+class RegistrationResource(Resource):
+    @login_required
+    def delete(self, registration_id):
+        registration = Registration.query.get(registration_id)
+        if not registration:
+            return {'message': 'Registration not found'}, 404
+
+        cls = Class.query.get(registration.class_id)
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+
+        try:
+            db.session.delete(registration)
+            db.session.commit()
+            return {'message': 'Registration deleted successfully'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error deleting registration: {str(e)}'}, 500
+
 
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
-api.add_resource(CurrentUser, '/current_user')
 api.add_resource(Professors, '/professors')
 api.add_resource(Logout, '/logout')
 
 api.add_resource(Semesters, '/semesters')
-api.add_resource(SemesterClasses, '/semesters/<int:semester_id>/classes')
 api.add_resource(SemesterResource, "/semesters/<int:semester_id>")
 
-api.add_resource(Classes, '/classes', '/classes/<int:class_id>')
-api.add_resource(ClassStudents, '/classes/<int:class_id>/students') 
+api.add_resource(Classes, '/classes')
+api.add_resource(ClassEnrollment, '/classes/<int:class_id>/enrollment') 
 
 api.add_resource(Registrations, '/registrations')
-api.add_resource(Students, '/students', '/students/<int:id>')
+api.add_resource(RegistrationResource, '/registrations/<int:registration_id>')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
