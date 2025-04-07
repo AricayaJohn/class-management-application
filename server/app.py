@@ -177,33 +177,30 @@ class ClassEnrollment(Resource):
 class Registrations(Resource):
     @login_required
     def post(self):
-        json = request.get_json()
-        try:
-            #verify if class belongs to professosr
-            cls = Class.query.get(json['class_id'])
+        data = request.get_json()
+            cls = Class.query.get(data['class_id'])
+
             if not cls or cls.semester.professor_id != current_user.id:
                 return {'message': 'Class not found'}, 404
-            #check if student exists
-            if not Student.query.get(json['student_id']):
-                return {'message': 'Student not found'}, 404
 
             if Registration.query.filter_by(
-                student_id=json['student_id'],
-                class_id=json['class_id']
+                student_id=data['student_id'],
+                class_id=data['class_id']
             ).first():
                 return {'message': 'Student already registered'}, 400
 
             registration = Registration(
-                paid_status=json.get('paid_status', False),
-                student_id=json['student_id'],
-                class_id=json['class_id']
+                class_id=data['class_id'],
+                student_id=data['student_id'],
+                paid_status=False
             )
             db.session.add(registration)
             db.session.commit()
-            return registration.to_dict(rules=('-student.registrations', '-course.registrations')), 201
-        except Exception as e:
-            db.session.rollback()
-            return {'errors': str(e)}, 500
+            return {
+                'id': registration.id,
+                'paid_status': registration.paid_status,
+                'student': registration.student.to_dict(rules=('-registrations',))
+            }, 201
 
 class Students(Resource):
     @login_required
