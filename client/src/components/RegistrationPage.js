@@ -2,30 +2,35 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { UserContext } from "./Context";
 
-function StudentPage() {
+function RegistrationPage() {
     const { classId } = useParams();
     const { 
-        ClassStudents,
-        getAllStudents,
-        addRegistration,
-        deleteStuent, } = useContext(UserContext);
+        getClassEnrollment,
+        createRegistration,
+        deleteRegistration
+    } = useContext(UserContext);
 
-    const [ students, setStudents ] = useState([]);
-    const [allStudents, setAllStudents] = useState([]);
-    const [selectedStudentId, setSelectedStudentId] = useState("")
+    const [registrations, setRegistrations ] = useState([]);
+    const [available, setAvailable] = useState([]);
+    const [selected, setSelected] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        ClassStudents(classId)
-          .then((data) => setStudents(Array.isArray(data) ? data : []))
-          .catch((err) => {
-            console.error("Error loading class students:", err);
-            setStudents([]);
-          });
-
-        getAllStudents()
-          .then((data) => setAllStudents(Array.isArray(data) ? data : []))
-          .catch((err) => console.error("Error loading all students:", err));
-    }, [classId, ClassStudents, getAllStudents]);
+        const loadData = async () => {
+            try {
+                setLoading(true);
+                const data = await getClassEnrollment(classId);
+                setRegistrations(data.registrations);
+                setAvailable(data.available);
+            }catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, [classId, getClassEnrollment])
 
     const handleEnroll = () => {
         if (!selectedStudentId) return;
@@ -92,4 +97,4 @@ function StudentPage() {
     )
 }
 
-export default StudentPage;
+export default RegistrationPage;
