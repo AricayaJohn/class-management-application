@@ -191,6 +191,18 @@ const getClassEnrollment = useCallback((classId) => {
     .then(data => data);
 }, [])
 
+const createRegistration = useCallback((registrationData) => {
+    return fetch("/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(registrationData)
+    })
+    .then(handleResponse);
+}, []);
+
+
+
 
 
 
