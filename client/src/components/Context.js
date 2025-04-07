@@ -28,17 +28,8 @@ const processSessionData = (data) => {
         setLoggedIn(true);
         if (data.semesters) {
             setSemesters(data.semesters);
-            //get all classes for semester
             const allClasses = data.semesters.flatMap(semester => semester.classes || []);
             setClasses(allClasses);
-
-            //get all registrations 
-            const allRegistrations = allClasses.flatMap(cls => cls.registrations || []);
-            setRegistrations(allRegistrations);
-            
-            //get all students 
-            const allStudents = allRegistrations.map(reg => reg.student).filter(Boolean);
-            setStudents(allStudents);
         }
     }
 };
