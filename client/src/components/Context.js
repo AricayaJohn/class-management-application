@@ -183,6 +183,15 @@ const addClass = (className, credits, room, semesterId) => {
       });
 };
 
+const getClassEnrollment = useCallback((classId) => {
+    return fetch(`/classes/${classId}/enrollment`, {
+        credentials: "include"
+    })
+    .then(handleResponse)
+    .then(data => data);
+}, [])
+
+
 
 
 
