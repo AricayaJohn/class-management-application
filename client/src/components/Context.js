@@ -201,7 +201,17 @@ const createRegistration = useCallback((registrationData) => {
     .then(handleResponse);
 }, []);
 
+const deleteRegistration = useCallback((registrationId) => {
+    return fetch(`/registrations/${registrationId}`, {
+        method: "DELETE",
+        credentials: "include"
+    })
+    .then(handleResponse)
+    .then(() => {
+    })
+}, [])
 
+const handleResponse
 
 
 
