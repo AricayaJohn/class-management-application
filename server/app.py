@@ -120,12 +120,6 @@ class SemesterResource(Resource):
             return {"message": f"Error updating semester: {str(e)}"}, 500
 
 class Classes(Resource):
-    def get(self, class_id):
-        #fetch students for class
-        students = db.session.query(Student).join(Registration).filter(Registration.class_id == class_id).all()
-        students_data = [student.to_dict(rules=('-registration.student',)) for student in students]
-        return make_response(students_data, 200)
-
     def post(self):
         json = request.get_json()
         try:
@@ -154,14 +148,31 @@ class Classes(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
-# class ClassStudents(Resource):
-#     @login_required
-#     def get(self, class_id):
-#         cls = Class.query.get(class_id)
-#         if not cls or cls.semester.professor_id != current_user.id:
-#             return {'message': 'Class not found'}, 404
-#         return [s.to_dict(rules=('-registrations.student'))
-#         for s in cls.students], 200
+class ClassEnrollment(Resource):
+    @login_required
+    def get(self, class_id):
+        cls = Class.query.get(class_id)
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Class not found'}, 404
+
+        registrations = Registration.query.filter_by(class_id=class_id).all()
+        registered = [{
+            'id': r.id,
+            'paid_status': r.paid_status,
+            'student': r.student.to_dict(rules=('-registrations',))
+        } for in r in registrations]
+
+        subquery = db.session.query(Registration.student_id).filter_by(class_id=class_id)
+        available = Student.query.filter(~Student.id.in_(subquery)).all()
+        available_students = [{
+            'student': s.to_dict(rules=('-registrations',)),
+            'existing_registrations': [r.class_id for r in s.registrations]
+        } for s in available]
+
+        return {
+            'registrations': registered,
+            'avaialable': available_students
+        }, 200
 
 class Registrations(Resource):
     @login_required
