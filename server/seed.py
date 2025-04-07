@@ -68,21 +68,21 @@ def create_classes(semesters):
 
     return [class1, class2, class3]
 
-def create_registrations(students, classes):
-    print("Creating registrations...")
-    registration1 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[0].id)
-    registration2 = Registration(paid_status=False, class_id=classes[1].id, student_id=students[0].id)
+# def create_registrations(students, classes):
+#     print("Creating registrations...")
+#     registration1 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[0].id)
+#     registration2 = Registration(paid_status=False, class_id=classes[1].id, student_id=students[0].id)
 
-    registration3 = Registration(paid_status=True, class_id=classes[1].id, student_id=students[1].id)
-    registration4 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[1].id)
+#     registration3 = Registration(paid_status=True, class_id=classes[1].id, student_id=students[1].id)
+#     registration4 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[1].id)
 
-    registration5 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[2].id)
-    registration6 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[2].id)
+#     registration5 = Registration(paid_status=True, class_id=classes[0].id, student_id=students[2].id)
+#     registration6 = Registration(paid_status=False, class_id=classes[2].id, student_id=students[2].id)
 
-    db.session.add_all([registration1, registration2, registration3, registration4, registration5, registration6])
-    db.session.commit()
+#     db.session.add_all([registration1, registration2, registration3, registration4, registration5, registration6])
+#     db.session.commit()
 
-    return [registration1, registration2, registration3, registration4, registration5, registration6]
+#     return [registration1, registration2, registration3, registration4, registration5, registration6]
 
 def seed():
     print("Starting seed process...")
@@ -91,7 +91,7 @@ def seed():
     students = create_students()
     semesters = create_semesters(professors)
     classes = create_classes(semesters)
-    registrations = create_registrations(students, classes)
+    # registrations = create_registrations(students, classes)
 
     print("Database seeded successfully")
 

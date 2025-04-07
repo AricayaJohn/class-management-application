@@ -93,15 +93,15 @@ class Semesters(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
-    # def delete(self, semester_id):
-    #     semester = db.session.get(Semester, semester_id)
-    #     if not semester:
-    #         return {'message': 'Semester not found'}, 404
-    #     if semester.professor_id != current_user.id:
-    #         return {'message': 'Unauthorized'}, 403
-    #     db.session.delete(semester)
-    #     db.session.commit()
-    #     return {}, 204
+    def delete(self, semester_id):
+        semester = db.session.get(Semester, semester_id)
+        if not semester:
+            return {'message': 'Semester not found'}, 404
+        if semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+        db.session.delete(semester)
+        db.session.commit()
+        return {}, 204
 
 class SemesterClasses(Resource):
     def get(self, semester_id): #get all semester for current professor
@@ -161,34 +161,44 @@ class Classes(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
-class ClassStudent(Resource):
-    @login_required
-    def get(self, class_id):
-        cls = Class.query.get(class_id)
-        if not cls or cls.semester.professor_id != current_user.id:
-            return {'message': 'Class not found'}, 404
-        return [s.to_dict(rules=('-registrations.student'))
-        for s in cls.students], 200
+# class ClassStudents(Resource):
+#     @login_required
+#     def get(self, class_id):
+#         cls = Class.query.get(class_id)
+#         if not cls or cls.semester.professor_id != current_user.id:
+#             return {'message': 'Class not found'}, 404
+#         return [s.to_dict(rules=('-registrations.student'))
+#         for s in cls.students], 200
 
 class Registrations(Resource):
+    @login_required
     def post(self):
         json = request.get_json()
         try:
-            new_registration = Registration(
-                paid_status=json['paid_status'],
-                class_id=json['class_id'],
+            #verify if class belongs to professosr
+            cls = Class.query.get(json['class_id'])
+            if not cls or cls.semester.professor_id != current_user.id:
+                return {'message': 'Class not found'}, 404
+            #check if student exists
+            if not Student.query.get(json['student_id']):
+                return {'message': 'Student not found'}, 404
+
+            if Registration.query.filter_by(
                 student_id=json['student_id'],
+                class_id=json['class_id']
+            ).first():
+                return {'message': 'Student already registered'}, 400
+
+            registration = Registration(
+                paid_status=json.get('paid_status', False),
+                student_id=json['student_id'],
+                class_id=json['class_id']
             )
-            db.session.add(new_registration)
+            db.session.add(registration)
             db.session.commit()
-            return make_response(new_registration.to_dict(rules=('-student.registrations', '-course.registrations',)), 201)
-        except ValueError as e:
-            db.session.rollback()
-            return {'errors': f'Invalid data format: {str(e)}'}, 400
-        except IntegrityError:
-            db.session.rollback()
-            return{'errors': 'Registration already exists'}, 400
+            return registration.to_dict(rules=('-student.registrations', '-course.registrations')), 201
         except Exception as e:
+            db.session.rollback()
             return {'errors': str(e)}, 500
 
 class Students(Resource):
@@ -206,7 +216,7 @@ class Students(Resource):
                 name=json['name'], 
                 major=json['major']
             )
-            db.session.add(new_student)
+            db.session.add(student)
             db.session.commit()
             return student.to_dict(rules=('-registrations.student',)), 201
         except Exception as e:
@@ -227,10 +237,14 @@ api.add_resource(Login, '/login')
 api.add_resource(CurrentUser, '/current_user')
 api.add_resource(Professors, '/professors')
 api.add_resource(Logout, '/logout')
+
 api.add_resource(Semesters, '/semesters')
 api.add_resource(SemesterClasses, '/semesters/<int:semester_id>/classes')
 api.add_resource(SemesterResource, "/semesters/<int:semester_id>")
+
 api.add_resource(Classes, '/classes', '/classes/<int:class_id>')
+api.add_resource(ClassStudents, '/classes/<int:class_id>/students') 
+
 api.add_resource(Registrations, '/registrations')
 api.add_resource(Students, '/students', '/students/<int:id>')
 

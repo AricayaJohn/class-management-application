@@ -100,6 +100,9 @@ class Student(db.Model, SerializerMixin):
 
     registrations = db.relationship('Registration', back_populates='student', cascade='all, delete-orphan')
 
+    #proxy access
+    classes = association_proxy('registrations', 'course')
+
     @validates('name')
     def validate_name(self, key, name):
         if not name or not isinstance(name, str):
@@ -154,6 +157,9 @@ class Class(db.Model, SerializerMixin):
     semester = db.relationship('Semester', back_populates='classes')
     registrations = db.relationship('Registration', back_populates='course', cascade='all, delete-orphan')
 
+    #added proxy 
+    students = association_proxy('registrations', 'student')
+
     @validates('class_name')
     def validate_class_name(self, key, class_name):
         if not class_name or not isinstance(class_name, str):
@@ -183,27 +189,35 @@ class Class(db.Model, SerializerMixin):
 
 class Registration(db.Model, SerializerMixin): 
     __tablename__ = "registrations"
-    serialize_rules = ('-student.registrations', '-course.registrations',)
+    serialize_rules = (
+        '-student.registrations',
+         '-course.registrations',
+         '-student.classes',
+         '-course.students'
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     paid_status = db.Column(db.Boolean, nullable=False, default=False)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'))
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
 
-    student = db.relationship('Student', back_populates='registrations')
-    course = db.relationship('Class', back_populates='registrations')
+    student = db.relationship('Student', back_populates='registrations', lazy='joined')
+    course = db.relationship('Class', back_populates='registrations', lazy='joined')
 
     @validates('class_id')
     def validate_class_id(self, key, class_id):
-        if not class_id or not isinstance(class_id, int):
-            raise ValueError('Class ID must be a valid integer')
-        return class_id
+        try:
+            return int(class_id)
+        except (ValueError, TypeError):
+            raise ValueError("Class ID must be a valid integer")
+
 
     @validates('student_id')
     def validate_student_id(self, key, student_id):
-        if not student_id or not isinstance(student_id, int):
+        try:
+            return int(student_id)
+        except (ValueError, TypeError):
             raise ValueError("Student ID must be a valid integer")
-        return student_id
 
     def __repr__(self):
         return f'<Registration ID: {self.id} | Paid: {self.paid_status}>'
