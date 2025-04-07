@@ -15,7 +15,7 @@ useEffect(() => {
         .then((response) => {
             if (response.ok)
                 return response.json();
-                throw new Error("Not authenticated");
+            throw new Error("Not authenticated");
         })
         .then(processSessionData)
         .catch(() => setLoggedIn(false));
@@ -107,13 +107,6 @@ const logout = () => {
 const ClassesForSemester = (semesterId) => {
     return Promise.resolve(classes.filter(cls => cls.semester_id === semesterId));
 }
-
-//fetch students for class 
-const ClassStudents = (classId) => {
-    return fetch(`/classes/${classId}/students`, {
-    credentials: "include"})
-        .then(handleResponse);
-    };
 
 //CRUD operations 
 const addSemester = (nameYear) => {
@@ -211,13 +204,6 @@ const deleteRegistration = useCallback((registrationId) => {
     })
 }, [])
 
-const handleResponse
-
-
-
-
-
-
 const handleResponse = (response) => {
     if (!response.ok) {
         return response.json().then(err => {
@@ -242,14 +228,14 @@ return (
         signup,
         logout,
 
+        //CRUD operations
         //data fetching
         ClassesForSemester,
-
-        //CRUD operations
         addSemester,
         deleteSemester,
-        addClass,
         updateSemester,
+
+        addClass,
 
         getClassEnrollment,
         createRegistration,

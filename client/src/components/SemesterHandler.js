@@ -6,8 +6,9 @@ import { UserContext } from "./Context";
 
 function SemesterHandler() {
     const navigate = useNavigate();
-    const { addSemester, deleteSemester, semesters, loggedIn, error } = useContext(UserContext);
+    const { addSemester, deleteSemester, updateSemester, semesters, loggedIn, error } = useContext(UserContext);
     const [loading, setLoading] = useState(false);
+    const [editingId, setEditingId] =useState(null);
     
     useEffect(() => {
         if (!loggedIn) {
@@ -16,7 +17,7 @@ function SemesterHandler() {
     }, [loggedIn, navigate]);
 
     const initialValues = {
-        nameYear: "",
+        nameYear: semesters.find(s => s.id === editingId)?.name_year || "",
     };
 
     const validationSchema = Yup.object({
