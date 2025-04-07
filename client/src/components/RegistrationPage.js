@@ -23,7 +23,7 @@ function RegistrationPage() {
                 const data = await getClassEnrollment(classId);
                 setRegistrations(data.registrations);
                 setAvailable(data.available);
-            }catch (err) {
+            } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -36,12 +36,13 @@ function RegistrationPage() {
         if (!selected) return;
         try {
             setLoading(true);
-            await(createRegistration({
+            await createRegistration({
                 class_id: classId,
                 student_id:selected
-            }));
+            });
             const newData = await getClassEnrollment(classId);
             setRegistrations(newData.registrations);
+            setAvailable(newData.available)
             setSelected("");
         } catch (err) {
             setError(err.message);
@@ -50,56 +51,70 @@ function RegistrationPage() {
         }
     };
 
-    const handleDeleteStudent = (studentId) => {
-        deleteStudent(studentId)
-          .then(() => {
-            setStudents(students.filter((student) => student.id !== studentId));
-          })
-          .catch((error) => {
-            console.error("Error deleting student:", error);
-          });
+    const handleRemove = async (registrationId) => {
+        if (window.confirm("Are you sure you want to remove this student")) {
+            try {
+                setLoading(true);
+                await deleteRegistration(registrationId);
+                const newData = await getClassEnrollment(classId);
+                setRegistrations(newData.registrations);
+                setAvailable(newData.available);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
-    const availableStudents = allStudents.filter(
-        (s) => !students.find((enrolled) => enrolled.id === s.id)
-    );
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div>
-            <h1> Enroll Students</h1>
+            <h1>Registered Students</h1>
+            <ul>
+                {registrations.length > 0 ? (
+                    registrations.map(reg => (
+                        <li key={reg.id}>
+                            {reg.student.name} - {reg.student.major}
+                            {reg.paid_status ? " (Paid)" : " (Unpaid)"}
+                            <button
+                                onClick={() => handleRemove(reg.id)}
+                                disabled={loading}
+                                className="remove-btn"
+                            >
+                                Remove
+                            </button>
+                        </li>
+                    ))
+                ) : (
+                    <p>No Students enrolled yet.</p>
+                )}
+            </ul>
 
-            {availableStudents.length > 0 ? (
+            <h2>Available to enroll from registration</h2>
+            {available.length > 0 ? (
                 <>
                     <select 
-                        value= {selectedStudentId}
-                        onChange={(e) => setSelectedStudentId(e.target.value)}
+                        value={selected}
+                        onChange={(e) => setSelected(e.target.value)}
                     >
-                        <option value="">Select a student...</option>
-                        {availableStudents.map((student) => (
-                            <option key={student.id} value= {student.id}>
-                                {student.name} ({student.major})
+                        <option value="">Select Student </option>
+                        {available.map(reg => (
+                            <option key={reg.student.id} value={reg.student.id}>
+                                {reg.student.name} - {reg.student.major}
                             </option>
                         ))}
                     </select>
                     <button onClick={handleEnroll}>Enroll Student</button>
                 </>
-            ): (
-                <p>No Students Available for enrollment.</p>
+            ) : (
+                <p>No Students available for enrollment.</p>
             )}
-            <ul>
-                {students.length > 0 ? (
-                    students.map((student) => (
-                        <li key={student.id}>
-                         {student.name} - {student.major}
-                         <button onClick={() => handleDeleteStudent(student.id)}>Delete</button>
-                        </li>
-                    ))
-                ) : (
-                    <p>No students enrolled yet.</p>
-                )}
-            </ul>
+            <Link to="/welcome">Back to Welcome Page</Link>
         </div>
-    )
+    );
 }
 
 export default RegistrationPage;
