@@ -211,7 +211,6 @@ class Registration(db.Model, SerializerMixin):
         except (ValueError, TypeError):
             raise ValueError("Class ID must be a valid integer")
 
-
     @validates('student_id')
     def validate_student_id(self, key, student_id):
         try:

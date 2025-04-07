@@ -18,13 +18,6 @@ class CheckSession(Resource):
             return current_user.to_dict(rules=('-_password_hash',)), 200
         return {'message': 'Not authenticated'}, 401
 
-class CurrentUser(Resource):
-    @login_required
-    def get(self):
-        if current_user.is_authenticated:
-            return current_user.to_dict(rules=('-_password_hash', '-semesters.professor',)), 200
-        return {'message': 'Not authenticated'}, 401
-
 class Login(Resource):
     def post(self):
         json = request.get_json()
@@ -93,25 +86,6 @@ class Semesters(Resource):
         except Exception as e:
             return {'errors': str(e)}, 500
 
-    def delete(self, semester_id):
-        semester = db.session.get(Semester, semester_id)
-        if not semester:
-            return {'message': 'Semester not found'}, 404
-        if semester.professor_id != current_user.id:
-            return {'message': 'Unauthorized'}, 403
-        db.session.delete(semester)
-        db.session.commit()
-        return {}, 204
-
-class SemesterClasses(Resource):
-    def get(self, semester_id): #get all semester for current professor
-        semester = db.session.get(Semester, semester_id)
-        if not semester:
-            return {'message': 'Semester not found'}, 404
-        classes = db.session.query(Class).filter_by(semester_id=semester_id).all()
-        classes_data = [cls.to_dict(rules=('-semester.classes','-registrations.course',)) for cls in classes]
-        return make_response(classes_data, 200)
-
 #function to delete semester
 class SemesterResource(Resource):
     def delete(self, semester_id):
@@ -125,6 +99,25 @@ class SemesterResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"message": f"Error deleting semester: {str(e)}"}, 500
+
+    @login_required
+    def patch(self, semester_id):
+        semester = db.session.get(Semester, semester_id)
+        if not semester:
+            return {"message": "Missing name_year field"}, 404
+        if semester.professor_id != current_user.id:
+            return {'message': 'Missing name_year field'}, 400
+
+        try: 
+            semester.name_year = data['name_year']
+            db.session.commit()
+            return semester.to_dict(), 200
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Semester name already exists'}, 400
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Error updating semester: {str(e)}"}, 500
 
 class Classes(Resource):
     def get(self, class_id):
