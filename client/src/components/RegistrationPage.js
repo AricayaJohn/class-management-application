@@ -94,7 +94,7 @@ function RegistrationPage() {
                         disabled={updatingId === reg.id}
                         className={`paid-status ${reg.paid_status ? 'paid' : 'unpaid'}`}
                     >
-                        {updating === reg.id ? 'Updating...' :
+                        {updatingId === reg.id ? 'Updating...' :
                         reg.paid_status ? 'Paid' : 'Unpaid'} 
                     </button>
                     <button
