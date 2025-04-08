@@ -44,7 +44,8 @@ function RegistrationPage() {
             student_id: selected
         })
             .then(() =>  getClassEnrollment(classId))
-            .then(() => {
+            .then(data => {
+                setAvailable(data.available);
                 setSelected("");
             })
             .catch(err => {
@@ -60,11 +61,14 @@ function RegistrationPage() {
             setRemovingId(registrationId);
             deleteRegistration(registrationId)
                 .then(() =>  getClassEnrollment(classId))
+                .then(data => {
+                    setAvailable(data.available);
+                })
                 .catch(err => {
                     setError(err.message);
                 })
                 .finally(() => {
-                    setLoading(false);
+                    setRemovingId(null)
                 });
         }
     };
@@ -88,7 +92,7 @@ function RegistrationPage() {
             <ul>
             {registrations.map(reg => (
                 <li key={reg.id}>
-                    {reg.student.nam} - {reg.student.major}
+                    {reg.student.name} - {reg.student.major}
                     <button
                         onClick={() => handlePaidStatus(reg.id, reg.paid_status)}
                         disabled={updatingId === reg.id}
