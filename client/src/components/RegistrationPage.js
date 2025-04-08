@@ -17,53 +17,62 @@ function RegistrationPage() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const data = await getClassEnrollment(classId);
+        setLoading(true);
+        getClassEnrollment(classId)
+            .then(data => {
                 setRegistrations(data.registrations);
                 setAvailable(data.available);
-            } catch (err) {
+                setError(null);
+            }) 
+            .catch(err => {
                 setError(err.message);
-            } finally {
+            }) 
+            .finally(()=> {
                 setLoading(false);
-            }
-        };
-        loadData();
-    }, [classId, getClassEnrollment])
+            })
+        }, [classId, getClassEnrollment])
 
-    const handleEnroll = async () => {
+    const handleEnroll = () => {
         if (!selected) return;
-        try {
-            setLoading(true);
-            await createRegistration({
-                class_id: classId,
-                student_id:selected
-            });
-            const newData = await getClassEnrollment(classId);
+
+        setLoading(true);
+        createRegistration({
+            class_id: classId,
+            student_id: selected
+        })
+        .then(() => {
+            return getClassEnrollment(classId);
+        })
+        .then(newData => {
             setRegistrations(newData.registrations);
-            setAvailable(newData.available)
+            setAvailable(newData.available);
             setSelected("");
-        } catch (err) {
+        })
+        .catch(err => {
             setError(err.message);
-        } finally {
+        })
+        .finally(() => {
             setLoading(false);
-        }
+        });
     };
 
-    const handleRemove = async (registrationId) => {
+    const handleRemove = (registrationId) => {
         if (window.confirm("Are you sure you want to remove this student")) {
-            try {
-                setLoading(true);
-                await deleteRegistration(registrationId);
-                const newData = await getClassEnrollment(classId);
-                setRegistrations(newData.registrations);
-                setAvailable(newData.available);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+            setLoading(true);
+            deleteRegistration(registrationId)
+                .then(() => {
+                    return getClassEnrollment(classId);
+                })
+                .then(newData => {
+                    setRegistrations(newData.registrations);
+                    setAvailable(newData.available);
+                })
+                .catch(err => {
+                    setError(err.message);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
         }
     };
 

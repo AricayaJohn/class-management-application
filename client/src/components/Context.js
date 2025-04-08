@@ -8,6 +8,7 @@ function UserProvider({ children }) {
     const [error, setError ] = useState(null); // State for errors 
     const [semesters, setSemesters] = useState([])
     const [classes, setClasses] = useState([])
+    const [registrations, setRegistrations] = useState([]);
 
 //Auto-login when app starts or when user login 
 useEffect(() => {
@@ -181,7 +182,10 @@ const getClassEnrollment = useCallback((classId) => {
         credentials: "include"
     })
     .then(handleResponse)
-    .then(data => data);
+    .then(data => {
+        setRegistrations(data.registrations);
+        return data
+    });
 }, [])
 
 const createRegistration = useCallback((registrationData) => {
@@ -201,8 +205,22 @@ const deleteRegistration = useCallback((registrationId) => {
     })
     .then(handleResponse)
     .then(() => {
+        setRegistrations(prev => prev.filter(r => r.id !== registrationId));
+    });
+}, []);
+
+const addStudent = useCallback((studentData) => {
+    return fetch("students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        credentials: "include",
+        body: JSON.stringify(studentData),
     })
-}, [])
+    .then(handleResponse)
+    .then(newStudent => {
+        return newStudent;
+    });
+}, []);
 
 const handleResponse = (response) => {
     if (!response.ok) {
@@ -213,6 +231,22 @@ const handleResponse = (response) => {
     return response.json();
 };
 
+const updateRegistration = useCallback((registrationId, paidStatus) => {
+    return fetch(`/registrations/${registrationId}`, {
+        method: "PATCH",
+        headers: {'Content-Type': "application/json"},
+        credentials: "include",
+        body: JSON.stringify({paidStatus: paidStatus})
+    })
+    .then(handleResponse)
+    .then(updatedRegistration => {
+        setRegistrations(prev => prev.map(reg => 
+            reg.id === updatedRegistration.id ? updatedRegistration : reg
+        ));
+        return updatedRegistration
+    });
+}, [])
+
 return (
     <UserContext.Provider
         value={{
@@ -221,6 +255,7 @@ return (
         loggedIn,
         error,
         semesters,
+        registrations,
 
         
         //authorization functions
@@ -240,6 +275,8 @@ return (
         getClassEnrollment,
         createRegistration,
         deleteRegistration,
+
+        addStudent,
     }} >
         {children}
     </UserContext.Provider>
