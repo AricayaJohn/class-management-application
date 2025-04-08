@@ -11,12 +11,12 @@ export default function AuthRoute({ children, type = 'protected', notFound = fal
     }
 
     if (type === 'auth' && loggedIn) {
-        return <Navigate to = "/welcome" replace state={{ from: location}} />;
+        return <Navigate to="/welcome" replace state={{ from: location}} />;
     }
 
     if (type === 'protected' && !loggedIn) {
-        return <Navigate to='login' replace state={{from: location }} />;
+        return <Navigate to="login" replace state={{from: location }} />;
     }
 
-    return children
+    return children;
 }
