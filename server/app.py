@@ -229,6 +229,28 @@ class RegistrationResource(Resource):
             db.session.rollback()
             return {'message': f'Error deleting registration: {str(e)}'}, 500
 
+class Students(Resource):
+    @login_required
+    def post(self):
+        data = request.get_json()
+        required_fields = ['name', 'major']
+        if not all(field for field in required_fields):
+            return{'message': 'Missing requred fields (name, major)'}, 400
+
+        try: 
+            newStudent = Student(
+                name=data['name'],
+                major=data['major']
+            )
+            db.session.add(new_student)
+            db.session.commit()
+            return new_student.to_dict(rules=('-registrations',)), 201
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Student already exists'}, 400
+        except Exception as e:
+            return {'message': str(e)}, 500
+
 
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
@@ -243,6 +265,8 @@ api.add_resource(ClassEnrollment, '/classes/<int:class_id>/enrollment')
 
 api.add_resource(Registrations, '/registrations')
 api.add_resource(RegistrationResource, '/registrations/<int:registration_id>')
+
+api.add_resource('/students')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
