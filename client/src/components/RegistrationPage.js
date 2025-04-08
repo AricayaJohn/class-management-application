@@ -1,26 +1,29 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { UserContext } from "./Context";
+import StudentForm from "./StudentForm";
 
 function RegistrationPage() {
     const { classId } = useParams();
     const { 
+        registrations,
         getClassEnrollment,
         createRegistration,
-        deleteRegistration
+        deleteRegistration,
+        updateRegistration
     } = useContext(UserContext);
 
-    const [registrations, setRegistrations ] = useState([]);
     const [available, setAvailable] = useState([]);
     const [selected, setSelected] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [removingId, setRemovingId] = useState(null);
+    const [updatingId, setUpdatingId] = useState(null);
 
     useEffect(() => {
         setLoading(true);
         getClassEnrollment(classId)
             .then(data => {
-                setRegistrations(data.registrations);
                 setAvailable(data.available);
                 setError(null);
             }) 
@@ -40,33 +43,23 @@ function RegistrationPage() {
             class_id: classId,
             student_id: selected
         })
-        .then(() => {
-            return getClassEnrollment(classId);
-        })
-        .then(newData => {
-            setRegistrations(newData.registrations);
-            setAvailable(newData.available);
-            setSelected("");
-        })
-        .catch(err => {
-            setError(err.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
+            .then(() =>  getClassEnrollment(classId))
+            .then(() => {
+                setSelected("");
+            })
+            .catch(err => {
+                setError(err.message);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     const handleRemove = (registrationId) => {
         if (window.confirm("Are you sure you want to remove this student")) {
-            setLoading(true);
+            setRemovingId(registrationId);
             deleteRegistration(registrationId)
-                .then(() => {
-                    return getClassEnrollment(classId);
-                })
-                .then(newData => {
-                    setRegistrations(newData.registrations);
-                    setAvailable(newData.available);
-                })
+                .then(() =>  getClassEnrollment(classId))
                 .catch(err => {
                     setError(err.message);
                 })
@@ -76,6 +69,16 @@ function RegistrationPage() {
         }
     };
 
+    const handlePaidStatus = (registrationId, currentStatus) => {
+        setUpdatingId(registrationId);
+        const newStatus = !currentStatus;
+
+        updateRegistration(registrationId, newStatus)
+            .then(() => getClassEnrollment(classId))
+            .catch(err => setError(err.message))
+            .finally(() => setUpdatingId(null));
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -83,26 +86,28 @@ function RegistrationPage() {
         <div>
             <h1>Registered Students</h1>
             <ul>
-                {registrations.length > 0 ? (
-                    registrations.map(reg => (
-                        <li key={reg.id}>
-                            {reg.student.name} - {reg.student.major}
-                            {reg.paid_status ? " (Paid)" : " (Unpaid)"}
-                            <button
-                                onClick={() => handleRemove(reg.id)}
-                                disabled={loading}
-                                className="remove-btn"
-                            >
-                                Remove
-                            </button>
-                        </li>
-                    ))
-                ) : (
-                    <p>No Students enrolled yet.</p>
-                )}
+            {registrations.map(reg => (
+                <li key={reg.id}>
+                    {reg.student.nam} - {reg.student.major}
+                    <button
+                        onClick={() => handlePaidStatus(reg.id, reg.paid_status)}
+                        disabled={updatingId === reg.id}
+                        className={`paid-status ${reg.paid_status ? 'paid' : 'unpaid'}`}
+                    >
+                        {updating === reg.id ? 'Updating...' :
+                        reg.paid_status ? 'Paid' : 'Unpaid'} 
+                    </button>
+                    <button
+                        onClick={() => handleRemove(reg.id)}
+                        disabled={removingId === reg.id}
+                    >
+                        {removingId === reg.id ? "Removing..." : "Remove"}
+                    </button>
+                </li>
+            ))}
             </ul>
 
-            <h2>Available to enroll from registration</h2>
+            <h2>Enroll Students</h2>
             {available.length > 0 ? (
                 <>
                     <select 
@@ -121,6 +126,7 @@ function RegistrationPage() {
             ) : (
                 <p>No Students available for enrollment.</p>
             )}
+            <StudentForm setAvailable={setAvailable} setError={setError} />
             <Link to="/welcome">Back to Welcome Page</Link>
         </div>
     );

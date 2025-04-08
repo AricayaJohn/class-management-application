@@ -210,7 +210,7 @@ const deleteRegistration = useCallback((registrationId) => {
 }, []);
 
 const addStudent = useCallback((studentData) => {
-    return fetch("students", {
+    return fetch("/students", {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         credentials: "include",
@@ -236,7 +236,7 @@ const updateRegistration = useCallback((registrationId, paidStatus) => {
         method: "PATCH",
         headers: {'Content-Type': "application/json"},
         credentials: "include",
-        body: JSON.stringify({paidStatus: paidStatus})
+        body: JSON.stringify({paid_status: paidStatus})
     })
     .then(handleResponse)
     .then(updatedRegistration => {
@@ -275,6 +275,7 @@ return (
         getClassEnrollment,
         createRegistration,
         deleteRegistration,
+        updateRegistration,
 
         addStudent,
     }} >
