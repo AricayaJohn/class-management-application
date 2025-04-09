@@ -199,7 +199,7 @@ class Registrations(Resource):
         registration = Registration(
             class_id=data['class_id'],
             student_id=data['student_id'],
-            paid_status=False
+            paid_status=data.get('paid_status', False)
         )
         db.session.add(registration)
         db.session.commit()
@@ -229,16 +229,42 @@ class RegistrationResource(Resource):
             db.session.rollback()
             return {'message': f'Error deleting registration: {str(e)}'}, 500
 
+    @login_required
+    def patch(self, registration_id):
+        registration = Registration.query.get(registration_id)
+        if not registration:
+            return {'message': 'Registration not found'}, 404
+
+        cls = Class.query.get(registration.class_id)
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+
+        data = request.get_json()
+        if 'paid_status' not in data:
+            return {'message': 'Missing paid_status field'}, 400
+
+        try:
+            registration.paid_status = data['paid_status']
+            db.session.commit()
+            return make_response({
+                'id': registration.id,
+                'paid_status': registration.paid_status,
+                'student': registration.student.to_dict(rules=('-registrations',))
+            }, 200)
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error updating registration: {str(e)}'}, 500
+
 class Students(Resource):
     @login_required
     def post(self):
         data = request.get_json()
         required_fields = ['name', 'major']
-        if not all(field for field in required_fields):
-            return{'message': 'Missing requred fields (name, major)'}, 400
+        if not all(field in data for field in required_fields):
+            return{'message': 'Missing required fields (name, major)'}, 400
 
         try: 
-            newStudent = Student(
+            new_student = Student(
                 name=data['name'],
                 major=data['major']
             )
@@ -266,7 +292,7 @@ api.add_resource(ClassEnrollment, '/classes/<int:class_id>/enrollment')
 api.add_resource(Registrations, '/registrations')
 api.add_resource(RegistrationResource, '/registrations/<int:registration_id>')
 
-api.add_resource('/students')
+api.add_resource(Students, '/students')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
