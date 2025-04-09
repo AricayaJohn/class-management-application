@@ -127,18 +127,6 @@ const addSemester = (nameYear) => {
       }); 
 };
 
-const deleteSemester = (semesterId) => {
-    return fetch(`/semesters/${semesterId}`, {
-        method: "DELETE",
-        credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to delete semester");
-        setSemesters(semesters.filter(s => s.id !== semesterId));
-        setClasses(classes.filter(c => c.semester_id !== semesterId));
-      });
-};
-
 const updateSemester = useCallback((semesterId, nameYear) => {
     return fetch(`/semesters/${semesterId}`, {
         method: "PATCH",
@@ -277,7 +265,6 @@ return (
         //data fetching
         ClassesForSemester,
         addSemester,
-        deleteSemester,
         updateSemester,
 
         addClass,

@@ -6,7 +6,7 @@ import { UserContext } from "./Context";
 
 function SemesterHandler() {
     const navigate = useNavigate();
-    const { addSemester, deleteSemester, updateSemester, semesters, loggedIn, error } = useContext(UserContext);
+    const { addSemester, updateSemester, semesters, loggedIn, error } = useContext(UserContext);
     const [loading, setLoading] = useState(false);
     const [editingId, setEditingId] =useState(null);
     
@@ -54,24 +54,6 @@ function SemesterHandler() {
             setSubmitting(false);
             setLoading(false);
         });
-    };
-
-    const handleDeleteSemester = (semesterId) => {
-        if (window.confirm("Are you sure you want to delete this semester?")) {
-            setLoading(true);
-            deleteSemester(semesterId)
-                .then(() => {
-                    if (editingId === semesterId) setEditingId(null);
-                    alert("Semester deleted successfully!");
-            })
-            .catch((error) => {
-                console.error("Error deleting semester:", error);
-                alert(error.message || "Failed to delete semester. Please try again.");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -140,13 +122,6 @@ function SemesterHandler() {
                                     disabled={loading}
                                 >
                                     Edit
-                                </button>
-                                <button 
-                                    type ="button"
-                                    onClick={() => handleDeleteSemester(semester.id)}
-                                    disabled={loading}
-                                >
-                                    Delete
                                 </button>
                             </div>
                         </li>

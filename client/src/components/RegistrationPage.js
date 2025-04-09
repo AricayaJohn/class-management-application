@@ -87,7 +87,7 @@ function RegistrationPage() {
 
     return (
         <div>
-            <h1>Registered Students</h1>
+            <h1>Class Students</h1>
             <ul>
             {registrations && registrations.length > 0 ? (
                 registrations.map(registration => (
@@ -114,7 +114,7 @@ function RegistrationPage() {
             )}
             </ul>
 
-            <h2>Enroll Students</h2>
+            <h2>Register students in class</h2>
             {available.length > 0 ? (
                 <>
                     <select 

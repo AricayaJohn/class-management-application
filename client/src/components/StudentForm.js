@@ -43,7 +43,10 @@ function StudentForm({ setAvailable, setError }) {
         >
             {({ isSubmitting }) => (
                 <Form className="student-form">
-                    <h3>Add New Student</h3>
+                    <br />
+                    <h3>Add new student to registration list
+                        if student not found
+                    </h3>
                     <div className="form-group">
                         <label htmlFor="name">Student Name:</label>
                         <Field type="text" id="name" name="name" />

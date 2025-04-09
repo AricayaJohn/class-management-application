@@ -56,7 +56,7 @@ function WelcomePage(){
                         </option>
                       ))}
                     </select>
-                    <button onClick={()=> navigate("/add-semester")}>Add/Delete Semester</button>
+                    <button onClick={()=> navigate("/add-semester")}>Add/Edit Semester</button>
                 </div>
             </section>
 
