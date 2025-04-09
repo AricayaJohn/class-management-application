@@ -41,7 +41,7 @@ function RegistrationPage() {
         setLoading(true);
         createRegistration({
             class_id: classId,
-            student_id: selected
+            student_id: selected,
         })
             .then(() =>  getClassEnrollment(classId))
             .then(data => {
@@ -78,7 +78,6 @@ function RegistrationPage() {
         const newStatus = !currentStatus;
 
         updateRegistration(registrationId, newStatus)
-            .then(() => getClassEnrollment(classId))
             .catch(err => setError(err.message))
             .finally(() => setUpdatingId(null));
     };
@@ -90,25 +89,29 @@ function RegistrationPage() {
         <div>
             <h1>Registered Students</h1>
             <ul>
-            {registrations.map(reg => (
-                <li key={reg.id}>
-                    {reg.student.name} - {reg.student.major}
-                    <button
-                        onClick={() => handlePaidStatus(reg.id, reg.paid_status)}
-                        disabled={updatingId === reg.id}
-                        className={`paid-status ${reg.paid_status ? 'paid' : 'unpaid'}`}
-                    >
-                        {updatingId === reg.id ? 'Updating...' :
-                        reg.paid_status ? 'Paid' : 'Unpaid'} 
-                    </button>
-                    <button
-                        onClick={() => handleRemove(reg.id)}
-                        disabled={removingId === reg.id}
-                    >
-                        {removingId === reg.id ? "Removing..." : "Remove"}
-                    </button>
-                </li>
-            ))}
+            {registrations && registrations.length > 0 ? (
+                registrations.map(registration => (
+                    <li key={registration.id}>
+                        {registration.student.name} - {registration.student.major}{" "}
+                        <button 
+                            onClick={() => handlePaidStatus(registration.id, registration.paid_status)}
+                            disabled={updatingId === registration.id}
+                            className={`paid-status ${registration.paid_status ? 'Paid' : 'Unpaid'}`}
+                        >
+                            {updatingId === registration.id ? 'Updating...' :
+                            registration.paid_status ? 'Paid' : 'Unpaid'}
+                        </button>
+                        <button
+                            onClick={() => handleRemove(registration.id)}
+                            disabled={removingId === registration.id}
+                        >
+                            {removingId === registration.id ? "Removing..." : "Remove"}
+                        </button>
+                    </li>
+                ))
+            ) : (
+                <p> No students enrolled yet</p>
+            )}
             </ul>
 
             <h2>Enroll Students</h2>

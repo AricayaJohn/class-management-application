@@ -184,9 +184,15 @@ const getClassEnrollment = useCallback((classId) => {
     .then(handleResponse)
     .then(data => {
         setRegistrations(data.registrations);
-        return data
-    });
+        return data;
+    })
 }, [])
+
+useEffect(() => {
+    if (registrations) {
+        setRegistrations(registrations);
+    }
+}, [registrations]);
 
 const createRegistration = useCallback((registrationData) => {
     return fetch("/registrations", {
@@ -243,7 +249,11 @@ const updateRegistration = useCallback((registrationId, paidStatus) => {
         setRegistrations(prev => prev.map(reg => 
             reg.id === updatedRegistration.id ? updatedRegistration : reg
         ));
-        return updatedRegistration
+        return updatedRegistration;
+    })
+    .catch(err => {
+        setError(err.message);
+        throw err;
     });
 }, [])
 
@@ -256,7 +266,7 @@ return (
         error,
         semesters,
         registrations,
-
+        setRegistrations,
         
         //authorization functions
         login,
