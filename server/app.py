@@ -257,10 +257,15 @@ class RegistrationResource(Resource):
 
 class Students(Resource):
     @login_required
+    def get(self):
+        students = student.query.all()
+        return [s.to_dict(rules=('-registrations',)) for s in students], 200
+        
+    @login_required
     def post(self):
         data = request.get_json()
         required_fields = ['name', 'major']
-        if not all(field in data for field in required_fields):
+        if not all(field for field in required_fields):
             return{'message': 'Missing required fields (name, major)'}, 400
 
         try: 
