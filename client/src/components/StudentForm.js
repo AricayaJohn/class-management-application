@@ -1,12 +1,10 @@
-import {Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useContext, useState } from 'react';
 import { UserContext } from './Context';
-import { useParams } from 'react-router-dom';
 
-function StudentForm({ setAvailable, setError }) {
-    const { addStudent, getClassEnrollment } = useContext(UserContext);
-    const { classId } = useParams();
+function StudentForm({ setError, onSuccess }) {
+    const { addStudent } = useContext(UserContext);
     const [loading, setLoading] = useState(false);
 
     const studentValidationSchema = Yup.object({
@@ -21,9 +19,10 @@ function StudentForm({ setAvailable, setError }) {
     const handleCreateStudent = (values, { setSubmitting, resetForm }) => {
         setLoading(true);
         addStudent(values)
-            .then(() => getClassEnrollment(classId))
-            .then((newData) => {
-                setAvailable(newData.available);
+            .then(newStudent => {
+                if (onSuccess) {
+                    onSuccess(newStudent);
+                }
                 resetForm();
             })
             .catch((err) => {
@@ -37,7 +36,7 @@ function StudentForm({ setAvailable, setError }) {
 
     return (
         <Formik
-            initialValues={{name: '', major: ''}}
+            initialValues={{name: '', major: '' }}
             validationSchema={studentValidationSchema}
             onSubmit={handleCreateStudent}
         >

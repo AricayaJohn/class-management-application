@@ -9,6 +9,7 @@ function UserProvider({ children }) {
     const [semesters, setSemesters] = useState([])
     const [classes, setClasses] = useState([])
     const [registrations, setRegistrations] = useState([]);
+    const [students, setStudents] = useState([])
 
 //Auto-login when app starts or when user login 
 useEffect(() => {
@@ -31,7 +32,13 @@ const processSessionData = (data) => {
             setSemesters(data.semesters);
             const allClasses = data.semesters.flatMap(semester => semester.classes || []);
             setClasses(allClasses);
+
+            const allRegs = data.semesters.flatMap(semester => 
+            (semester.classes || []).flatMap(c => c.registrations || [])
+            );
+            setRegistrations(allRegs);
         }
+        setStudents(data.students || []);
     }
 };
 
@@ -48,16 +55,16 @@ const login = (credentials) => {
         })
         .then((userData) => {
             return fetch("/check_session", {credentials: "include" })
-            .then((res) => res.json())
-            .then((sessionData) => {
-                processSessionData(sessionData);
-                setError(null);
-                });
-            })
-            .catch((error) => {
-                setError(error.message);
-                throw error;
-            });
+        })
+        .then((res) => res.json())
+        .then((sessionData) => {
+            processSessionData(sessionData);
+            setError(null);
+        })
+        .catch((error) => {
+            setError(error.message);
+            throw error;
+        });
 };
 
 const signup = (credentials) => {
@@ -176,12 +183,6 @@ const getClassEnrollment = useCallback((classId) => {
     })
 }, [])
 
-useEffect(() => {
-    if (registrations) {
-        setRegistrations(registrations);
-    }
-}, [registrations]);
-
 const createRegistration = useCallback((registrationData) => {
     return fetch("/registrations", {
         method: "POST",
@@ -189,7 +190,11 @@ const createRegistration = useCallback((registrationData) => {
         credentials: "include",
         body: JSON.stringify(registrationData)
     })
-    .then(handleResponse);
+    .then(handleResponse)
+    .then(newRegistration  => {
+        setRegistrations(prev => [...prev, newRegistration]);
+        return newRegistration;
+    });
 }, []);
 
 const deleteRegistration = useCallback((registrationId) => {
@@ -238,10 +243,6 @@ const updateRegistration = useCallback((registrationId, paidStatus) => {
             reg.id === updatedRegistration.id ? updatedRegistration : reg
         ));
         return updatedRegistration;
-    })
-    .catch(err => {
-        setError(err.message);
-        throw err;
     });
 }, [])
 
@@ -254,6 +255,7 @@ return (
         error,
         semesters,
         registrations,
+        students,
         setRegistrations,
         
         //authorization functions
