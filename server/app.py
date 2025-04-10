@@ -212,6 +212,24 @@ class Registrations(Resource):
 
 class RegistrationResource(Resource):
     @login_required
+    def delete(self, registration_id):
+        registration = Registration.query.get(registration_id)
+        if not registration:
+            return {'message': 'Registration not found'}, 404
+
+        cls = Class.query.get(registration.class_id)
+        if not cls or cls.semester.professor_id != current_user.id:
+            return {'message': 'Unauthorized'}, 403
+
+        try:
+            db.session.delete(registration)
+            db.session.commit()
+            return {'message': 'Registration deleted successfully'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error deleting registration: {str(e)}'}, 500
+
+    @login_required
     def patch(self, registration_id):
         registration = Registration.query.get(registration_id)
         if not registration:
