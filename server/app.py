@@ -16,7 +16,6 @@ class CheckSession(Resource):
     def get(self):
         if current_user.is_authenticated:
             return current_user.to_dict(rules=('-_password_hash',)), 200
-        return {'message': 'Not authenticated'}, 401
 
 class Login(Resource):
     def post(self):
@@ -177,8 +176,8 @@ class ClassEnrollment(Resource):
         } for s in available]
 
         return {
-            'registrations': registered,
-            'available': available_students
+            'registrations': registered,  # Make sure this key exists
+            'available': available_students  # And this one too
         }, 200
 
 class Registrations(Resource):
@@ -196,12 +195,13 @@ class Registrations(Resource):
         ).first():
             return {'message': 'Student already registered'}, 400
 
-        registration = Registration(
+        registration = Registration(  # Fixed variable name consistency
             class_id=data['class_id'],
             student_id=data['student_id'],
             paid_status=data.get('paid_status', False)
         )
-        db.session.add(registration)
+            
+        db.session.add(registration)    
         db.session.commit()
             
         return {
@@ -256,17 +256,18 @@ class RegistrationResource(Resource):
             return {'message': f'Error updating registration: {str(e)}'}, 500
 
 class Students(Resource):
+    # Add this to Students class:
     @login_required
     def get(self):
-        students = student.query.all()
+        students = Student.query.all()
         return [s.to_dict(rules=('-registrations',)) for s in students], 200
-        
+
     @login_required
     def post(self):
         data = request.get_json()
         required_fields = ['name', 'major']
         if not all(field for field in required_fields):
-            return{'message': 'Missing required fields (name, major)'}, 400
+            return{'message': 'Missing requred fields (name, major)'}, 400
 
         try: 
             new_student = Student(
@@ -301,4 +302,3 @@ api.add_resource(Students, '/students')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
