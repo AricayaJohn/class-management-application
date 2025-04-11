@@ -39,13 +39,17 @@ function RegistrationPage() {
 
     const handleEnroll = async () => {
         if (!selectedStudentId) return;
-
+        
         setLoading(true);
         try {
             await createRegistration({
                 class_id: parseInt(classId),
-                student_id: parseInt(selectedStudentId),
+                student_id: parseInt(selectedStudentId)
             });
+            
+            const updatedData = await getClassEnrollment(classId);
+            setAvailableStudents(updatedData.available || []);
+            
             setSelectedStudentId("");
         } catch (err) {
             setError(err.message);
@@ -56,8 +60,8 @@ function RegistrationPage() {
 
     const handleRemove = async (registrationId) => {
         if (!window.confirm("Are you sure you want to remove this student?")) return;
-            
-        setActionInProgress(prev => ({ ...prev, remove: registrationId}));
+        
+        setActionInProgress(prev => ({ ...prev, remove: registrationId }));
         try {
             const registrationToRemove = registrations.find(r => r.id === registrationId);
             await deleteRegistration(registrationId);
@@ -71,7 +75,7 @@ function RegistrationPage() {
                 ]);
             }
         } catch (err) {
-                setError(err.message);
+            setError(err.message);
         } finally {
             setActionInProgress(prev => ({ ...prev, remove: null }));
         }
@@ -95,30 +99,32 @@ function RegistrationPage() {
         <div>
             <h1>Class Students</h1>
             <ul>
-            {registrations.length > 0 ? (
-                registrations.map(registration => (
-                    <li key={registration.id}>
-                        {registration.student.name} - {registration.student.major}
-                        <button 
-                            onClick={() => handlePaidStatus(registration.id, registration.paid_status)}
-                            disabled={actionInProgress.update === registration.id}
-                            className={`paid-status ${registration.paid_status ? 'Paid' : 'Unpaid'}`}
-                        >
-                            {actionInProgress.update === registration.id
-                            ? 'Updating...' 
-                            : registration.paid_status ? 'Paid' : 'Unpaid'}
-                        </button>
-                        <button
-                            onClick={() => handleRemove(registration.id)}
-                            disabled={actionInProgress.remove === registration.id}
-                        >
-                            {actionInProgress.remove === registration.id ? "Removing..." : "Remove"}
-                        </button>
-                    </li>
-                ))
-            ) : (
-                <p>No students enrolled yet</p>
-            )}
+                {registrations.length > 0 ? (
+                    registrations.map(registration => (
+                        <li key={registration.id}>
+                            {registration.student.name} - {registration.student.major}
+                            <button 
+                                onClick={() => handlePaidStatus(registration.id, registration.paid_status)}
+                                disabled={actionInProgress.update === registration.id}
+                                className={`paid-status ${registration.paid_status ? 'Paid' : 'Unpaid'}`}
+                            >
+                                {actionInProgress.update === registration.id 
+                                    ? 'Updating...' 
+                                    : registration.paid_status ? 'Paid' : 'Unpaid'}
+                            </button>
+                            <button
+                                onClick={() => handleRemove(registration.id)}
+                                disabled={actionInProgress.remove === registration.id}
+                            >
+                                {actionInProgress.remove === registration.id 
+                                    ? "Removing..." 
+                                    : "Remove"}
+                            </button>
+                        </li>
+                    ))
+                ) : (
+                    <p>No students enrolled yet</p>
+                )}
             </ul>
 
             <h2>Register students in class</h2>
@@ -138,13 +144,15 @@ function RegistrationPage() {
                     </select>
                     <button 
                         onClick={handleEnroll}
-                        disabled={!selectedStudentId || loading}>
+                        disabled={!selectedStudentId || loading}
+                    >
                         {loading ? "Enrolling..." : "Enroll Student"}
                     </button>
                 </>
             ) : (
                 <p>No students available for enrollment.</p>
             )}
+            
             <StudentForm 
                 setError={setError}
                 onSuccess={(newStudent) => {
