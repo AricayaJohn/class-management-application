@@ -26,8 +26,18 @@ The web application helps professors manage their classess in a semester and the
 ## Technology Used:
 
 ### Front End:
+React: JavaScript library for building user interfaces
+React Router: For client-side routing and navigation
+Context API: For state management across components
+Fetch API: For making HTTP requests to the backend
 
 ### Back End:
+Python Flask: Micro web framework for building RESTful APIs
+Flask-RESTful: Extension for creating REST APIs with Flask
+SQLAlchemy: Object Relational Mapping (ORM) tool for database interactions
+Flask-Login: For user session management and authentication
+Bcrypt: For password hashing and security
+SQLAlchemy-Serializer: For model serialization to JSON
 
 ### Other Library and Tools:
   - SQLAlchemy : Object Relational Mapping(ORM) tool that is used to communicate with the databases using python classes
